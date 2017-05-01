@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	exp "instacli/expression"
+	exp "github.com/hemantasapkota/insta/expression"
 )
 
 func (c *Commander) unwrapQuotes(in string) (out string) {

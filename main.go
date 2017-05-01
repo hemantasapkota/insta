@@ -7,7 +7,7 @@ import (
 	"github.com/hemantasapkota/goma/gomadb"
 	ldb "github.com/hemantasapkota/goma/gomadb/leveldb"
 	"github.com/hemantasapkota/djangobot"
-	"instacli/commander"
+	"github.com/hemantasapkota/insta/commander"
 	"io/ioutil"
 	"gopkg.in/yaml.v2"
 	"strings"
