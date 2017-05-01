@@ -22,3 +22,10 @@ _testmain.go
 *.exe
 *.test
 *.prof
+
+.DS_Store
+.idea
+
+liner_history
+.credentials.yaml
+goma.db

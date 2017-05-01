@@ -1,0 +1,15 @@
+# Search tags
+
+"ig_hashtag(coffee) { media.after(J0HWMqK0QAAAF0HWMqJigAAAFjgA, 12) { count, nodes { __typename, caption, code, comments { count }, comments_disabled, date, dimensions { height, width }, display_src, id, is_video, likes { count }, owner { id }, thumbnail_src, video_views }, page_info } }"
+
+# Followers
+
+"ig_user(12312312) { followed_by.first(20) { count, page_info { end_cursor, has_next_page }, nodes { id, is_verified, followed_by_viewer, requested_by_viewer, full_name, profile_pic_url, username } }"
+
+"ig_user(2291761151) { followed_by.first(20) { nodes { id } } }"
+
+
+# Following
+
+"ig_user(12312312) { follows.first(20) { count, page_info { end_cursor, has_next_page }, nodes { id, is_verified, followed_by_viewer, requested_by_viewer, full_name, profile_pic_url, username } } }"
+

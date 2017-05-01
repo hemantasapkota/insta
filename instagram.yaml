@@ -1,0 +1,35 @@
+scrape_entry_data:
+  Endpoint: https://www.instagram.com/{{ .Path }}/
+  Method: custom
+  Log: false
+  Usage:  path=explore/tags/coffee or path=<<your_insta_username>>
+
+query:
+  Endpoint: https://www.instagram.com/query/
+  Method: post
+  Log: false
+  Usage: q=(GraphQL syntax) ref=tags::show query_id=
+
+like:
+  Endpoint: https://www.instagram.com/web/likes/{{ .ID }}/like/
+  Method: post
+  Log: true
+  Usage: id=1470947521505123979
+
+follow:
+  Endpoint: https://www.instagram.com/web/friendships/{{ .ID }}/follow/
+  Method: post
+  Log: true
+  Usage: id=4657721499
+
+unfollow:
+  Endpoint: https://www.instagram.com/web/friendships/{{ .ID }}/unfollow/
+  Method: post
+  Log: true
+  Usage: id=4657721499
+
+add:
+  Endpoint: https://www.instagram.com/web/comments/{{ .ID }}/add/
+  Method: post
+  Log: true
+  Usage: id=1483759429887158585 comment_text= ( post id )
