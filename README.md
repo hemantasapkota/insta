@@ -44,7 +44,7 @@ Instagram web is built on top of Django. Using [djangobot](https://github.com/he
 
 **Does Instagram know about this ?** 
 
-Pretty sure they do. If they wanted prevent something like this, they'd have re-captcha enabled on the login page, and not just the sign-up page. 
+Pretty sure they do. If they wanted prevent something like this, they'd have re-captcha enabled on the login page, and not just the sign-up page. See https://www.instagram.com/
 
 # Features
 
@@ -55,7 +55,7 @@ Pretty sure they do. If they wanted prevent something like this, they'd have re-
 # Roadmap
 
 * True automation
-* Console app
+* CLI app
 * Mobile apps ( IOS & Android )
 * Chrome extension
 
