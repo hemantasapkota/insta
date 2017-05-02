@@ -36,11 +36,15 @@ acc2:
 ``` insta -account acc1 ```
 
 # Show me a demo
-[![asciicast](https://asciinema.org/a/8lfvvdi1gm6nd1t0rydfcmkci.png)](https://asciinema.org/a/8lfvvdi1gm6nd1t0rydfcmkci)
+[![asciicast](https://asciinema.org/a/6ksjrq7404k4877thbv5ega9r.png)](https://asciinema.org/a/6ksjrq7404k4877thbv5ega9r)
 
 # How does it work ?
 
-    #TODO
+Instagram web is built on top of Django. Using [djangobot](https://github.com/hemantasapkota/djangobot), Insta logs you in as a web user. From this point onwards, it behaves exactly like a web browser.
+
+**Does Instagram know about this ?** 
+
+Pretty sure they do. If they wanted prevent something like this, they'd have re-Captcha enabled on the login page. 
 
 # Features
 
@@ -54,7 +58,4 @@ acc2:
 * Mobile apps ( IOS & Android )
 * Chrome extension
 
-# Contribution Guidelines
-
-   TODO
 
