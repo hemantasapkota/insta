@@ -4,7 +4,7 @@ Insta is a command line power tool for Instagram. With it, you can like, follow,
 
 # Motivation
 
-There're plenty of Instagram automation tools floating around the web and app stores. Most of them ask for your username and password which is a big safety risk.
+There're plenty of Instagram automation tools floating around the web and app stores. Most of them, however, ask for your username and password which poses a big safety risk.
 
 With insta, you can automate engagement yourself.
 
