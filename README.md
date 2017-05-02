@@ -36,12 +36,11 @@ acc2:
 ``` insta -account acc1 ```
 
 # Show me a demo
-
-![Video](https://asciinema.org/a/8lfvvdi1gm6nd1t0rydfcmkci)
+[![asciicast](https://asciinema.org/a/8lfvvdi1gm6nd1t0rydfcmkci.png)](https://asciinema.org/a/8lfvvdi1gm6nd1t0rydfcmkci)
 
 # How does it work ?
 
-Using [Djangobot](https://github.com/hemantasapkota/djangobot), Insta logs you in as a web user. This relies on the fact that Instagram web is built on top of Django framework and login
+    #TODO
 
 # Features
 
@@ -58,3 +57,4 @@ Using [Djangobot](https://github.com/hemantasapkota/djangobot), Insta logs you i
 # Contribution Guidelines
 
    TODO
+
