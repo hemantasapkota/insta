@@ -40,7 +40,7 @@ acc2:
 
 # How does it work ?
 
-Instagram web is built on top of Django. Using [djangobot](https://github.com/hemantasapkota/djangobot), Insta logs you in as a web user. From this point onwards, it behaves exactly like a web browser. Note: I created djangobot as well.
+Instagram web is built on top of Django. Using [djangobot](https://github.com/hemantasapkota/djangobot), Insta logs you in as a web user. From this point onwards, it behaves exactly like a web browser.
 
 **Does Instagram know about this ?** 
 
