@@ -42,10 +42,6 @@ acc2:
 
 Instagram web is built on top of Django. Using [djangobot](https://github.com/hemantasapkota/djangobot), Insta logs you in as a web user. From this point onwards, it behaves exactly like a web browser.
 
-**Does Instagram know about this ?** 
-
-Pretty sure they do. If they wanted prevent something like this, they'd have re-captcha enabled on the login page, and not just the sign-up page. See https://www.instagram.com/
-
 # Features
 
 * Interactive console
