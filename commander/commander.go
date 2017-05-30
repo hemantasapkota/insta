@@ -4,54 +4,57 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/go-yaml/yaml"
-	"github.com/peterh/liner"
-	"github.com/wsxiaoys/terminal/color"
 	"goma"
 	"html/template"
 	"io/ioutil"
 	"os"
 	"strings"
 	"sync"
+
+	"github.com/go-yaml/yaml"
 	"github.com/hemantasapkota/djangobot"
+	"github.com/peterh/liner"
+	"github.com/wsxiaoys/terminal/color"
 )
 
 // A struct for logging the commands
-var commandLog CommandLog = CommandLog{Log: map[string]interface{}{}}
-var accountContext string = ""
+var cmdLog = &commandLog{Log: map[string]interface{}{}}
+var accountContext = ""
 
-type CommandLog struct {
+type commandLog struct {
 	*goma.Object
 	sync.Mutex
 
 	Log map[string]interface{}
 }
 
-func (log CommandLog) Key() string {
+func (log *commandLog) Key() string {
 	if accountContext == "" {
 		return "commandLog"
 	}
 	return accountContext
 }
 
-type CmdFunc func(command string, tokens []string, data map[string]string) interface{}
+type cmdFunc func(command string, tokens []string, data map[string]string) interface{}
 
+//Commander ...
 type Commander struct {
 	Intents   map[string]interface{}
 	Responses map[string]interface{}
 	Store     map[string]interface{}
-	Commands  map[string]CmdFunc
+	Commands  map[string]cmdFunc
 
 	bot *djangobot.Bot
 }
 
+//New ...
 func New(bot *djangobot.Bot) *Commander {
 	commander := &Commander{
 		Intents:   map[string]interface{}{},
 		Responses: map[string]interface{}{},
 		Store:     map[string]interface{}{},
 
-		Commands: map[string]CmdFunc{},
+		Commands: map[string]cmdFunc{},
 		bot:      bot,
 	}
 
@@ -60,6 +63,7 @@ func New(bot *djangobot.Bot) *Commander {
 	return commander
 }
 
+//LoadIntentsFromFile ...
 func (c *Commander) LoadIntentsFromFile(filename string) *Commander {
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -103,9 +107,10 @@ func (c *Commander) makeEndpoint(endpoint string, data map[string]string) string
 	return endpoint
 }
 
+//LoadIntents ...
 func (c *Commander) LoadIntents(intents []byte) error {
 	if intents == nil {
-		return errors.New("Intents data empty.")
+		return errors.New("intents data empty")
 	}
 
 	c.Intents = make(map[string]interface{})
@@ -115,7 +120,7 @@ func (c *Commander) LoadIntents(intents []byte) error {
 		return err
 	}
 
-	for key, _ := range c.Intents {
+	for key := range c.Intents {
 		c.Commands[key] = c.RequestExecutorCmd
 	}
 
@@ -131,13 +136,15 @@ func (c *Commander) LoadIntents(intents []byte) error {
 	return nil
 }
 
+//PrintCommands ...
 func (c *Commander) PrintCommands() {
-	for cmdName, _ := range c.Commands {
+	for cmdName := range c.Commands {
 		color.Print("@g\t ", cmdName)
 		println()
 	}
 }
 
+//Execute ...
 func (c *Commander) Execute(command string) (result interface{}) {
 	cmd, tokens, data := c.parseCommand(command)
 
@@ -157,19 +164,19 @@ func (c *Commander) Execute(command string) (result interface{}) {
 			intent := intentObj.(map[interface{}]interface{})
 			if intent["Log"].(bool) {
 				go func() {
-					commandLog.Lock()
-					defer commandLog.Unlock()
+					cmdLog.Lock()
+					defer cmdLog.Unlock()
 
-					commandLog.Log[command] = result
-					commandLog.Save(commandLog)
+					cmdLog.Log[command] = result
+					cmdLog.Save(cmdLog)
 				}()
 			}
 		}
 	}
-
 	return
 }
 
+//Listen ...
 func (c *Commander) Listen() {
 	line := liner.NewLiner()
 	defer line.Close()
@@ -177,28 +184,28 @@ func (c *Commander) Listen() {
 	line.SetCtrlCAborts(true)
 
 	line.SetCompleter(func(line string) (list []string) {
-		for cmd_name, _ := range c.Commands {
-			if strings.HasPrefix(cmd_name, line) {
-				list = append(list, cmd_name)
+		for cmdName := range c.Commands {
+			if strings.HasPrefix(cmdName, line) {
+				list = append(list, cmdName)
 			}
 		}
 		return
 	})
 
-	history_fn := "liner_history"
-	history_file, err := os.Open(history_fn)
+	historyFn := "liner_history"
+	historyFile, err := os.Open(historyFn)
 	if err != nil {
-		history_file, _ = os.Create(history_fn)
+		historyFile, _ = os.Create(historyFn)
 	}
-	defer history_file.Close()
+	defer historyFile.Close()
 
 	prompter := func() (string, error) {
-		cmd_name, err := line.Prompt("")
-		cmd_name = strings.TrimSpace(cmd_name)
-		if cmd_name == "?" {
+		cmdName, err := line.Prompt("")
+		cmdName = strings.TrimSpace(cmdName)
+		if cmdName == "?" {
 			c.PrintCommands()
 		}
-		return cmd_name, err
+		return cmdName, err
 	}
 
 	for {
@@ -211,5 +218,4 @@ func (c *Commander) Listen() {
 			color.Print("@y>")
 		}
 	}
-
 }
