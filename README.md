@@ -4,7 +4,7 @@ Insta is a command line power tool for Instagram. With it, you can like, follow,
 
 # Motivation
 
-There're plenty of Instagram automation tools floating around the web and app stores. Most of them ask for your username and password which is a big safety risk.
+There're plenty of Instagram automation tools floating around the web and app stores. Most of them, however, ask for your username and password which poses a big safety risk.
 
 With insta, you can automate engagement yourself.
 
@@ -36,11 +36,11 @@ acc2:
 ``` insta -account acc1 ```
 
 # Show me a demo
-[![asciicast](https://asciinema.org/a/8lfvvdi1gm6nd1t0rydfcmkci.png)](https://asciinema.org/a/8lfvvdi1gm6nd1t0rydfcmkci)
+[![asciicast](https://asciinema.org/a/6ksjrq7404k4877thbv5ega9r.png)](https://asciinema.org/a/6ksjrq7404k4877thbv5ega9r)
 
 # How does it work ?
 
-    #TODO
+Instagram web is built on top of Django. Using [djangobot](https://github.com/hemantasapkota/djangobot), Insta logs you in as a web user. From this point onwards, it behaves exactly like a web browser.
 
 # Features
 
@@ -50,11 +50,9 @@ acc2:
 
 # Roadmap
 
-* Console app
+* True automation
+* CLI app
 * Mobile apps ( IOS & Android )
 * Chrome extension
 
-# Contribution Guidelines
-
-   TODO
 
