@@ -26,7 +26,7 @@ func (c *Commander) unwrapQuotes(in string) (out string) {
 	return
 }
 
-func (c *Commander) parseCommandData(in string) (cmdStr string, dataString string) {
+func (c *Commander) parseCommandData(in string) (cmdStr string, dataString string, resultStr string) {
 	// Find data part of the command. Data section starts with the first assignment (=)
 
 	// Input command:
@@ -37,17 +37,24 @@ func (c *Commander) parseCommandData(in string) (cmdStr string, dataString strin
 
 	// https://regex-golang.appspot.com/assets/html/index.html
 
+	leftRight := strings.Split(in, "=>")
+	if len(leftRight) > 1 {
+		resultStr = strings.TrimSpace(leftRight[1])
+	}
+
 	regex, _ := regexp.Compile(`\w+\=.+`)
-	dataToken := regex.FindStringSubmatch(in)
+
+	cmd := leftRight[0]
+	dataToken := regex.FindStringSubmatch(cmd)
 
 	if len(dataToken) == 1 {
 		dataString = dataToken[0]
 
 		// replace the data part of the command
-		cmdStr = strings.Replace(in, dataString, "", -1)
+		cmdStr = strings.Replace(cmd, dataString, "", -1)
 
 	} else {
-		cmdStr = in
+		cmdStr = cmd
 	}
 
 	return
@@ -105,7 +112,7 @@ func (c *Commander) processCommandData(in string) map[string]string {
 	return data
 }
 
-func (c *Commander) parseCommand(in string) (string, []string, map[string]string) {
+func (c *Commander) parseCommand(in string) (string, []string, map[string]string, string) {
 	// Commands can be nested.
 
 	// $() => function
@@ -121,7 +128,7 @@ func (c *Commander) parseCommand(in string) (string, []string, map[string]string
 	// Regex tester
 	// https://regex-golang.appspot.com/assets/html/index.html
 
-	cmd, dataString := c.parseCommandData(in)
+	cmd, dataString, resultVar := c.parseCommandData(in)
 	data := c.processCommandData(dataString)
 
 	// Evaluate nested commands
@@ -138,5 +145,5 @@ func (c *Commander) parseCommand(in string) (string, []string, map[string]string
 	newData = data
 
 	tokens := strings.Split(cmd, " ")
-	return tokens[0], tokens, newData
+	return tokens[0], tokens, newData, resultVar
 }
