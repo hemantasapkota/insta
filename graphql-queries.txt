@@ -8,8 +8,6 @@
 
 "ig_user(2291761151) { followed_by.first(20) { nodes { id } } }"
 
-
 # Following
 
 "ig_user(12312312) { follows.first(20) { count, page_info { end_cursor, has_next_page }, nodes { id, is_verified, followed_by_viewer, requested_by_viewer, full_name, profile_pic_url, username } } }"
-

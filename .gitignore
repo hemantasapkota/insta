@@ -25,7 +25,10 @@ _testmain.go
 
 .DS_Store
 .idea
+.vscode
 
 liner_history
 .credentials.yaml
 goma.db
+mobile/bindings/*
+.idea

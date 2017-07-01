@@ -3,14 +3,15 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/wsxiaoys/terminal/color"
+	"io/ioutil"
+	"strings"
+
+	"github.com/hemantasapkota/djangobot"
 	"github.com/hemantasapkota/goma/gomadb"
 	ldb "github.com/hemantasapkota/goma/gomadb/leveldb"
-	"github.com/hemantasapkota/djangobot"
 	"github.com/hemantasapkota/insta/commander"
-	"io/ioutil"
+	"github.com/wsxiaoys/terminal/color"
 	"gopkg.in/yaml.v2"
-	"strings"
 )
 
 const usage = `
@@ -20,7 +21,6 @@ Usage:
 `
 
 func main() {
-
 	username := flag.String("username", "", "Username")
 	password := flag.String("password", "", "Password")
 	account := flag.String("account", "", "Account from .credentials.yaml")
@@ -58,10 +58,11 @@ func main() {
 
 		if len(credentials) == 1 {
 			accountName := ""
-			for key, _ := range credentials {
+			for key := range credentials {
 				accountName = key
 				user, pass := getAccountCreds(key)
-				username = &user; password = &pass;
+				username = &user
+				password = &pass
 			}
 			color.Println("@yAuthenticating with account: ", strings.TrimSpace(accountName))
 		} else {
@@ -71,16 +72,17 @@ func main() {
 			}
 
 			user, pass := getAccountCreds(*account)
-			username = &user; password = &pass;
+			username = &user
+			password = &pass
 		}
 	}
 
 	// Instagram
 	instabot := djangobot.With("https://www.instagram.com/accounts/login/ajax/").
-			ForHost("instagram.com").
-			SetUsername(*username).
-			SetPassword(*password).
-			LoadCookies()
+		ForHost("instagram.com").
+		SetUsername(*username).
+		SetPassword(*password).
+		LoadCookies()
 
 	if instabot.Error != nil {
 		panic(instabot.Error)
