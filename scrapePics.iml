@@ -1,0 +1,34 @@
+scrape_entry_data path=explore/tags/coffee => result
+
+filter var=result query=entry_data.TagPage[0].tag.media.nodes[0].display_src => url
+download url="$(filter var=url)" file="0.jpg"
+
+filter var=result query=entry_data.TagPage[0].tag.media.nodes[1].display_src => url
+download url="$(filter var=url)" file="1.jpg"
+
+filter var=result query=entry_data.TagPage[0].tag.media.nodes[2].display_src => url
+download url="$(filter var=url)" file="2.jpg"
+
+filter var=result query=entry_data.TagPage[0].tag.media.nodes[3].display_src => url
+download url="$(filter var=url)" file="3.jpg"
+
+filter var=result query=entry_data.TagPage[0].tag.media.nodes[4].display_src => url
+download url="$(filter var=url)" file="4.jpg"
+
+filter var=result query=entry_data.TagPage[0].tag.media.nodes[5].display_src => url
+download url="$(filter var=url)" file="5.jpg"
+
+filter var=result query=entry_data.TagPage[0].tag.media.nodes[6].display_src => url
+download url="$(filter var=url)" file="6.jpg"
+
+filter var=result query=entry_data.TagPage[0].tag.media.nodes[7].display_src => url
+download url="$(filter var=url)" file="7.jpg"
+
+filter var=result query=entry_data.TagPage[0].tag.media.nodes[8].display_src => url
+download url="$(filter var=url)" file="8.jpg"
+
+filter var=result query=entry_data.TagPage[0].tag.media.nodes[9].display_src => url
+download url="$(filter var=url)" file="9.jpg"
+
+filter var=result query=entry_data.TagPage[0].tag.media.nodes[10].display_src => url
+download url="$(filter var=url)" file="10.jpg"
