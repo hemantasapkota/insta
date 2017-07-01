@@ -18,14 +18,17 @@ import (
 )
 
 // A struct for logging the commands
-var cmdLog = &commandLog{Log: map[string]interface{}{}}
+var cmdLog = &commandLog{Log: map[string]interface{}{}, Media: map[string]interface{}{}}
 var accountContext = ""
 
 type commandLog struct {
 	*goma.Object
-	sync.Mutex
 
-	Log map[string]interface{}
+	logMu sync.Mutex
+	Log   map[string]interface{}
+
+	mediaMu sync.Mutex
+	Media   map[string]interface{}
 }
 
 func (log *commandLog) Key() string {
@@ -125,13 +128,14 @@ func (c *Commander) LoadIntents(intents []byte) error {
 	}
 
 	// Load built in commands
-	c.Commands["last_response"] = c.LastResponseCmd
 	c.Commands["scrape_entry_data"] = c.ScrapeEntryDataCmd
+	c.Commands["filter"] = c.Filter
+	c.Commands["run_script"] = c.RunScript
 	c.Commands["counter"] = c.Counter
+	c.Commands["download"] = c.Download
 
 	// Experimental commands
-	//c.Commands["repeat"] = c.Repeat
-	//c.Commands["map"] = c.Map
+	// c.Commands["repeat"] = c.Repeat
 
 	return nil
 }
@@ -146,7 +150,7 @@ func (c *Commander) PrintCommands() {
 
 //Execute ...
 func (c *Commander) Execute(command string) (result interface{}) {
-	cmd, tokens, data := c.parseCommand(command)
+	cmd, tokens, data, resultVar := c.parseCommand(command)
 
 	// Execute the command
 	functor, ok := c.Commands[cmd]
@@ -158,14 +162,17 @@ func (c *Commander) Execute(command string) (result interface{}) {
 
 		c.printYaml(result)
 
+		// Store the result in c.Responses map
+		c.Store[resultVar] = result
+
 		// Log command and result
 		intentObj, ok := c.Intents[cmd]
 		if ok {
 			intent := intentObj.(map[interface{}]interface{})
 			if intent["Log"].(bool) {
 				go func() {
-					cmdLog.Lock()
-					defer cmdLog.Unlock()
+					cmdLog.logMu.Lock()
+					defer cmdLog.logMu.Unlock()
 
 					cmdLog.Log[command] = result
 					cmdLog.Save(cmdLog)
@@ -182,7 +189,6 @@ func (c *Commander) Listen() {
 	defer line.Close()
 
 	line.SetCtrlCAborts(true)
-
 	line.SetCompleter(func(line string) (list []string) {
 		for cmdName := range c.Commands {
 			if strings.HasPrefix(cmdName, line) {

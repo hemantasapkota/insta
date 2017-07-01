@@ -2,13 +2,12 @@ package commander
 
 import (
 	"fmt"
-	"time"
 	"github.com/wsxiaoys/terminal/color"
 	"strconv"
+	"time"
 )
 
 // Experimental
-
 func (c *Commander) Repeat(command string, tokens []string, data map[string]string) (result interface{}) {
 	if len(data) == 0 {
 		color.Println("@r", command, " frequency=(in seconds) cmd=")
@@ -38,22 +37,4 @@ func (c *Commander) Repeat(command string, tokens []string, data map[string]stri
 	}(cmdToExec)
 
 	return
-}
-
-func (c *Commander) Map(command string, tokens []string, data map[string]string) interface{} {
-	if len(data) == 0 || data["key"] == "" {
-		color.Println("@r", command, "key= value=")
-		return nil
-	}
-
-	if data["value"] == "" {
-		val := c.Store[data["key"]]
-		c.printYaml(val)
-		return val
-	}
-
-	// Store value
-	value := data["value"]
-	c.Store[data["key"]] = value
-	return value
 }

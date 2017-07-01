@@ -4,13 +4,18 @@ import (
 	"container/list"
 	"encoding/json"
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
-	"github.com/jmoiron/jsonq"
-	"github.com/wsxiaoys/terminal/color"
+	"io/ioutil"
 	"log"
+	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/jmoiron/jsonq"
+	"github.com/wsxiaoys/terminal/color"
 )
 
 func formEncode(data map[string]string) string {
@@ -21,7 +26,7 @@ func formEncode(data map[string]string) string {
 	return strings.Join(values, "&")
 }
 
-
+//RequestExecutorCmd ...
 func (c *Commander) RequestExecutorCmd(command string, tokens []string, data map[string]string) interface{} {
 	intent := c.Intents[command].(map[interface{}]interface{})
 	if len(data) == 0 {
@@ -31,12 +36,10 @@ func (c *Commander) RequestExecutorCmd(command string, tokens []string, data map
 
 	// Make template
 	endpoint := c.makeEndpoint(intent["Endpoint"].(string), data)
-
 	var body []byte
 
 	// get or post
 	method := intent["Method"].(string)
-
 	switch method {
 	case "get":
 		_, body, _ = c.bot.Requester("GET", endpoint).Client.EndBytes()
@@ -53,24 +56,22 @@ func (c *Commander) RequestExecutorCmd(command string, tokens []string, data map
 	// Unmarshal response
 	var m interface{}
 	err := json.Unmarshal(body, &m)
-
 	if err != nil {
 		log.Println(err)
 		return nil
 	}
-
 	c.Responses[command] = m
 
 	return m
 }
 
+//ScrapeEntryDataCmd ...
 func (c *Commander) ScrapeEntryDataCmd(command string, tokens []string, data map[string]string) interface{} {
 	intent := c.Intents[command].(map[interface{}]interface{})
 	if len(data) == 0 {
 		color.Println("@r ", command, intent["Usage"])
 		return nil
 	}
-
 	endpoint := c.makeEndpoint(intent["Endpoint"].(string), data)
 
 	// Scrape the url
@@ -103,19 +104,9 @@ func (c *Commander) ScrapeEntryDataCmd(command string, tokens []string, data map
 	return m
 }
 
-func (c *Commander) LastResponseCmd(command string, tokens []string, data map[string]string) interface{} {
-	if len(data) == 0 {
-		color.Println("@r", command, "cmd=scrape_entry_data query=entry_data.TagPage[0].tag.media.page_info.end_cursor")
-		return nil
-	}
-
-	response, ok := c.Responses[data["cmd"]]
-	if !ok {
-		return nil
-	}
-
+func _jsonQuery(result interface{}, data map[string]string) interface{} {
 	// JSON Object -> Query
-	jq := jsonq.NewQuery(response)
+	jq := jsonq.NewQuery(result)
 
 	// Get our query components
 	qComponents := func(in string) []string {
@@ -161,7 +152,6 @@ func (c *Commander) LastResponseCmd(command string, tokens []string, data map[st
 	}
 
 	queryTokens := qProcessArray(qComponents(data["query"]))
-
 	var obj interface{}
 	var err error
 
@@ -178,6 +168,51 @@ func (c *Commander) LastResponseCmd(command string, tokens []string, data map[st
 	return obj
 }
 
+func (c *Commander) Filter(command string, tokens []string, data map[string]string) interface{} {
+	if len(data) == 0 || data["var"] == "" {
+		color.Println("@r", command, "var=result query=entry_data.TagPage[0].tag.media.nodes[0].display_src")
+		return nil
+	}
+
+	result := c.Store[data["var"]]
+
+	if result, ok := result.(string); ok {
+		return result
+	}
+
+	return _jsonQuery(result, data)
+}
+
+func (c *Commander) RunScript(command string, token []string, data map[string]string) interface{} {
+	if len(data) == 0 {
+		color.Println("@r", command, "file=")
+		return nil
+	}
+
+	file, ok := data["file"]
+	if ok {
+		// path =
+		script := filepath.Join(".", file)
+		data, err := ioutil.ReadFile(script)
+		if err != nil {
+			color.Println("@r", command, err)
+			return nil
+		}
+
+		scripts := strings.Split(string(data), "\n")
+		for _, statement := range scripts {
+			if statement != "" {
+				c.Execute(statement)
+				time.Sleep(100 * time.Millisecond)
+			}
+		}
+
+	}
+
+	return nil
+}
+
+//Counter ...
 func (c *Commander) Counter(command string, tokens []string, data map[string]string) interface{} {
 	updateVal, ok := data["set"]
 	if ok {
@@ -200,4 +235,48 @@ func (c *Commander) Counter(command string, tokens []string, data map[string]str
 	return 0
 }
 
+//Download ...
+func (c *Commander) Download(command string, tokens []string, data map[string]string) interface{} {
+	intent := c.Intents[command].(map[interface{}]interface{})
+	if len(data) == 0 {
+		color.Println("@r ", command, intent["Usage"])
+		return nil
+	}
 
+	url, ok := data["url"]
+	if !ok {
+		color.Println("@r ", command, intent["Usage"])
+		return nil
+	}
+
+	_, body, errs := c.bot.Client.Get(url).EndBytes()
+	if errs != nil {
+		color.Println("@r", command, errs[0])
+		return nil
+	}
+
+	file, ok := data["file"]
+	if ok {
+		go func() {
+			dir := filepath.Join(".", "downloads")
+			_ = os.MkdirAll(dir, os.ModePerm)
+			path := filepath.Join("./downloads", file)
+			if path != "" {
+				err := ioutil.WriteFile(path, body, 0644)
+				if err != nil {
+					// error writing the file
+					color.Println("@r", command, err)
+					return
+				}
+			}
+		}()
+	}
+
+	cmdLog.mediaMu.Lock()
+	defer cmdLog.mediaMu.Unlock()
+
+	cmdLog.Media[url] = body
+	cmdLog.Save(cmdLog)
+
+	return "Success."
+}
