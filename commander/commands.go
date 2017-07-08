@@ -199,14 +199,21 @@ func (c *Commander) RunScript(command string, token []string, data map[string]st
 			return nil
 		}
 
-		scripts := strings.Split(string(data), "\n")
+		dataStr := strings.TrimSpace(string(data))
+		if len(dataStr) == 0 {
+			color.Println("@r", command, "Script Empty.")
+			return nil
+		}
+
+		scripts := strings.Split(dataStr, "\n")
 		for _, statement := range scripts {
-			if statement != "" {
+			// ignore empty strings or comments
+			stmt := strings.TrimSpace(statement)
+			if stmt != "" || stmt[0] != '#' {
 				c.Execute(statement)
 				time.Sleep(100 * time.Millisecond)
 			}
 		}
-
 	}
 
 	return nil

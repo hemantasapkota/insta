@@ -27,11 +27,8 @@ func (c *Commander) unwrapQuotes(in string) (out string) {
 }
 
 func (c *Commander) parseCommandData(in string) (cmdStr string, dataString string, resultStr string) {
-	// Find data part of the command. Data section starts with the first assignment (=)
-
 	// Input command:
 	// repeat frequency=10 cmd="$(like id=$(last_response cmd=scrape_entry_data query=entry_data.TagPage[0].media.nodes[$(COUNTER)]))"
-
 	// Output:
 	// frequency=10 cmd="like id=$(last_response cmd=scrape_entry_data query=entry_data.TagPage[0].media.nodes[$COUNTER])"
 
