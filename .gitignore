@@ -30,5 +30,4 @@ _testmain.go
 liner_history
 .credentials.yaml
 goma.db
-mobile/bindings/*
 .idea
