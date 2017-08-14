@@ -1,4 +1,4 @@
-scrape_entry_data:
+get_data:
   Endpoint: https://www.instagram.com/{{ .Path }}/
   Method: custom
   Log: false

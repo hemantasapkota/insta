@@ -65,8 +65,8 @@ func (c *Commander) RequestExecutorCmd(command string, tokens []string, data map
 	return m
 }
 
-//ScrapeEntryDataCmd ...
-func (c *Commander) ScrapeEntryDataCmd(command string, tokens []string, data map[string]string) interface{} {
+//GetDataCmd ...
+func (c *Commander) GetDataCmd(command string, tokens []string, data map[string]string) interface{} {
 	intent := c.Intents[command].(map[interface{}]interface{})
 	if len(data) == 0 {
 		color.Println("@r ", command, intent["Usage"])

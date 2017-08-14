@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"goma"
 	"html/template"
 	"io/ioutil"
 	"os"
@@ -12,9 +11,10 @@ import (
 	"sync"
 
 	"github.com/go-yaml/yaml"
-	"github.com/hemantasapkota/djangobot"
 	"github.com/peterh/liner"
 	"github.com/wsxiaoys/terminal/color"
+	"github.com/hemantasapkota/djangobot"
+	"github.com/hemantasapkota/goma"
 )
 
 // A struct for logging the commands
@@ -128,7 +128,7 @@ func (c *Commander) LoadIntents(intents []byte) error {
 	}
 
 	// Load built in commands
-	c.Commands["scrape_entry_data"] = c.ScrapeEntryDataCmd
+	c.Commands["get_data"] = c.GetDataCmd
 	c.Commands["filter"] = c.Filter
 	c.Commands["run_script"] = c.RunScript
 	c.Commands["counter"] = c.Counter

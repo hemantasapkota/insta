@@ -1,5 +1,5 @@
 # This is a comment
-scrape_entry_data path=explore/tags/latteart => result
+get_data path=explore/tags/latteart => result
 
 filter var=result query=entry_data.TagPage[0].tag.media.nodes[0].display_src => url
 download url="$(filter var=url)" file="0.jpg"
