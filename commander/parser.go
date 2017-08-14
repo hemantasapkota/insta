@@ -14,11 +14,8 @@ func (c *Commander) unwrapQuotes(in string) (out string) {
 	}
 	val := []byte(in)
 	if len(val) > 0 {
-		if val[0] == '"' {
-			val[0] = ' '
-		}
-		if val[len(val)-1] == '"' {
-			val[len(val)-1] = ' '
+		if val[0] == '"' && val[len(val)-1] == '"' {
+			val[0],val[len(val)-1] = ' ',' '
 		}
 		out = string(val)
 	}

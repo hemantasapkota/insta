@@ -105,6 +105,10 @@ func (c *Commander) GetDataCmd(command string, tokens []string, data map[string]
 }
 
 func _jsonQuery(result interface{}, data map[string]string) interface{} {
+	if result == nil {
+		return map[string]interface{}{}
+	}
+
 	// JSON Object -> Query
 	jq := jsonq.NewQuery(result)
 
