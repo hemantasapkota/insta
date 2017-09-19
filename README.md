@@ -35,9 +35,6 @@ acc2:
 
 ``` insta -account acc1 ```
 
-# Show me a demo
-[![asciicast](https://asciinema.org/a/6ksjrq7404k4877thbv5ega9r.png)](https://asciinema.org/a/6ksjrq7404k4877thbv5ega9r)
-
 # How does it work ?
 
 Instagram web is built on top of Django. Using [djangobot](https://github.com/hemantasapkota/djangobot), Insta logs you in as a web user. From this point onwards, it behaves exactly like a web browser.
@@ -47,6 +44,22 @@ Instagram web is built on top of Django. Using [djangobot](https://github.com/he
 * Interactive console
 * Manage multiple accounts
 * Database log
+* Built-in DSL for scripting flows
+
+# Flows
+
+Insta comes with a built-in DSL that can be used to script flows. Example flow listed below:
+
+```
+$(get_data path=explore/tags/coffee => result)
+$(loop range=0,5 => i)
+  $(filter var=result query=entry_data.TagPage[0].tag.media.nodes[$(`i`)].display_src => url)
+  $(download url="$(`url`)")
+$(pool)
+
+```
+
+The script queries for the tag *coffee*, loops through the result 5 times, filters the image url from the result and downloads it.
 
 # Roadmap
 
