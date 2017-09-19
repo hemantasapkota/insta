@@ -2,16 +2,16 @@
 get_data path=explore/tags/latteart => result
 
 filter var=result query=entry_data.TagPage[0].tag.media.nodes[0].display_src => url
-download url="$(filter var=url)" file="0.jpg"
+download url="$(`url`)" file="0.jpg"
 
 filter var=result query=entry_data.TagPage[0].tag.media.nodes[1].display_src => url
-download url="$(filter var=url)" file="1.jpg"
+download url="$(`url`)" file="1.jpg"
 
 filter var=result query=entry_data.TagPage[0].tag.media.nodes[2].display_src => url
-download url="$(filter var=url)" file="2.jpg"
+download url="$(`url`)" file="2.jpg"
 
 filter var=result query=entry_data.TagPage[0].tag.media.nodes[3].display_src => url
-download url="$(filter var=url)" file="3.jpg"
+download url="$(`url`)" file="3.jpg"
 
 filter var=result query=entry_data.TagPage[0].tag.media.nodes[4].display_src => url
-download url="$(filter var=url)" file="4.jpg"
+download url="$(`url`)" file="4.jpg"

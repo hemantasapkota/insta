@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net/url"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -184,6 +186,10 @@ func (c *Commander) Filter(command string, tokens []string, data map[string]stri
 		return result
 	}
 
+	if result, ok := result.(int); ok {
+		return result
+	}
+
 	return _jsonQuery(result, data)
 }
 
@@ -213,7 +219,7 @@ func (c *Commander) RunScript(command string, token []string, data map[string]st
 		for _, statement := range scripts {
 			// ignore empty strings or comments
 			stmt := strings.TrimSpace(statement)
-			if stmt != "" || stmt[0] != '#' {
+			if stmt != "" && stmt[0] != '#' {
 				c.Execute(statement)
 				time.Sleep(100 * time.Millisecond)
 			}
@@ -254,40 +260,43 @@ func (c *Commander) Download(command string, tokens []string, data map[string]st
 		return nil
 	}
 
-	url, ok := data["url"]
-	if !ok {
+	_url, ok := data["url"]
+	if !ok || _url == "" {
 		color.Println("@r ", command, intent["Usage"])
 		return nil
 	}
 
-	_, body, errs := c.bot.Client.Get(url).EndBytes()
+	_, body, errs := c.bot.Client.Get(_url).EndBytes()
 	if errs != nil {
 		color.Println("@r", command, errs[0])
 		return nil
 	}
 
-	file, ok := data["file"]
-	if ok {
-		go func() {
-			dir := filepath.Join(".", "downloads")
-			_ = os.MkdirAll(dir, os.ModePerm)
-			path := filepath.Join("./downloads", file)
-			if path != "" {
-				err := ioutil.WriteFile(path, body, 0644)
-				if err != nil {
-					// error writing the file
-					color.Println("@r", command, err)
-					return
-				}
-			}
-		}()
+	u, err := url.Parse(_url)
+	if err != nil {
+		color.Println("@r", command, errs[0])
+		return nil
 	}
+
+	go func() {
+		dir := filepath.Join(".", "downloads")
+		_ = os.MkdirAll(dir, os.ModePerm)
+		path := filepath.Join("./downloads", path.Base(u.Path))
+		if path != "" {
+			err := ioutil.WriteFile(path, body, 0644)
+			if err != nil {
+				// error writing the file
+				color.Println("@r", command, err)
+				return
+			}
+		}
+	}()
 
 	cmdLog.mediaMu.Lock()
 	defer cmdLog.mediaMu.Unlock()
 
-	cmdLog.Media[url] = body
+	cmdLog.Media[_url] = body
 	cmdLog.Save(cmdLog)
 
-	return "Success."
+	return "Downloaded " + _url
 }

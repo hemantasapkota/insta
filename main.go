@@ -2,35 +2,43 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"io/ioutil"
 	"strings"
+	"fmt"
 
 	"github.com/hemantasapkota/djangobot"
 	"github.com/hemantasapkota/goma/gomadb"
 	ldb "github.com/hemantasapkota/goma/gomadb/leveldb"
+
 	"github.com/hemantasapkota/insta/commander"
+	"github.com/hemantasapkota/insta/flags"
+
 	"github.com/wsxiaoys/terminal/color"
 	"gopkg.in/yaml.v2"
 )
 
-const usage = `
-Usage:
-	-username -password
-	-account ( If specified in the .credentials.yaml file )
-`
-
 func main() {
-	username := flag.String("username", "", "Username")
-	password := flag.String("password", "", "Password")
-	account := flag.String("account", "", "Account from .credentials.yaml")
+	username := flag.String("username", "", "")
+	password := flag.String("password", "", "")
+	account := flag.String("account", "", "Account from .credentials.yaml") 
+	exec := flag.String("exec", "", "Execute a command")
+	execFile := flag.String("execFile", "", "Execute file")
+
+	silent := flag.Bool("silent", false, "Only ouputs and errors will be printed.")
+	json := flag.Bool("json", false, "Output json")
 
 	flag.Parse()
+
+	flags.Silent = *silent
+
+	if *json {
+		flags.OutputFormat = "json"
+	}
 
 	if *username == "" || *password == "" {
 		data, err := ioutil.ReadFile(".credentials.yaml")
 		if err != nil {
-			fmt.Println(usage)
+			flag.PrintDefaults()
 			return
 		}
 
@@ -38,12 +46,12 @@ func main() {
 		err = yaml.Unmarshal(data, credentials)
 
 		if err != nil {
-			fmt.Println(usage)
+			flag.PrintDefaults()
 			return
 		}
 
 		if len(credentials) == 0 {
-			fmt.Println(usage)
+			flag.PrintDefaults()
 			return
 		}
 
@@ -64,13 +72,14 @@ func main() {
 				username = &user
 				password = &pass
 			}
-			color.Println("@yAuthenticating with account: ", strings.TrimSpace(accountName))
+			if !flags.Silent {
+				color.Println("@yAuthenticating with account: ", strings.TrimSpace(accountName))
+			}
 		} else {
-			if *account == "" {
-				fmt.Println(usage)
+			if *account == "" { 
+				flag.PrintDefaults()
 				return
 			}
-
 			user, pass := getAccountCreds(*account)
 			username = &user
 			password = &pass
@@ -108,6 +117,18 @@ func main() {
 
 	// Setup our commander
 	commandHandler := commander.New(instabot).LoadIntentsFromFile("instagram.yaml")
+
+	// If exec mode, then execute a command and exit
+	if *exec != "" {
+		commandHandler.Execute(*exec)
+		return
+	}
+
+	// execute script file
+	if *execFile != "" {
+		commandHandler.Execute(fmt.Sprintf(`run_script file="%s"`, *execFile))
+		return 
+	}
 
 	commandHandler.Listen()
 }

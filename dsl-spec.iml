@@ -1,0 +1,18 @@
+# Script
+# Any nested command should be part of a parent wrapped quotes
+
+# Shorthands
+# $(`i`) => $(filter var=i)
+# $()
+
+# Nested loop not supported
+
+#> profile bot
+# Specifies the profile. Profile defines bot behvaiour.
+
+$(get_data path=explore/tags/latteart => result)
+
+$(loop range=0,1 => i)
+  $(filter var=result query=entry_data.TagPage[0].tag.media.nodes[$(`i`)].display_src => url)
+  $(download url="$(`url`)")
+$(pool)

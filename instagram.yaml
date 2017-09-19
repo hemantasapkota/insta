@@ -35,6 +35,6 @@ add:
   Usage: id=1483759429887158585 comment_text= ( post id )
 
 download:
-  Usage: url=<<url>> file=
+  Usage: url=<<url>> 
   Log: true
-  Usage: url=https://instagram.fsyd3-1.fna.fbcdn.net/t51.2885-15/e35/19052159_152125878664509_222614730546610176_n.jpg file=coffee.jpg
+  Usage: url=https://instagram.fsyd3-1.fna.fbcdn.net/t51.2885-15/e35/19052159_152125878664509_222614730546610176_n.jpg

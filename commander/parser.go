@@ -3,10 +3,19 @@ package commander
 import (
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 
 	exp "github.com/hemantasapkota/insta/expression"
 )
+
+func toInt(index string) int {
+	i, err := strconv.Atoi(index)
+	if err != nil {
+		return 0
+	}
+	return i
+}
 
 func (c *Commander) unwrapQuotes(in string) (out string) {
 	if in == "" {
@@ -15,7 +24,7 @@ func (c *Commander) unwrapQuotes(in string) (out string) {
 	val := []byte(in)
 	if len(val) > 0 {
 		if val[0] == '"' && val[len(val)-1] == '"' {
-			val[0],val[len(val)-1] = ' ',' '
+			val[0], val[len(val)-1] = ' ', ' '
 		}
 		out = string(val)
 	}
@@ -30,7 +39,6 @@ func (c *Commander) parseCommandData(in string) (cmdStr string, dataString strin
 	// frequency=10 cmd="like id=$(last_response cmd=scrape_entry_data query=entry_data.TagPage[0].media.nodes[$COUNTER])"
 
 	// https://regex-golang.appspot.com/assets/html/index.html
-
 	leftRight := strings.Split(in, "=>")
 	if len(leftRight) > 1 {
 		resultStr = strings.TrimSpace(leftRight[1])
@@ -43,10 +51,8 @@ func (c *Commander) parseCommandData(in string) (cmdStr string, dataString strin
 
 	if len(dataToken) == 1 {
 		dataString = dataToken[0]
-
 		// replace the data part of the command
 		cmdStr = strings.Replace(cmd, dataString, "", -1)
-
 	} else {
 		cmdStr = cmd
 	}
@@ -55,13 +61,11 @@ func (c *Commander) parseCommandData(in string) (cmdStr string, dataString strin
 }
 
 func (c *Commander) processCommandData(in string) map[string]string {
-
 	data := map[string]string{}
 
 	// Replace all spaces with &, but don't replace spaces inside " "
 	// This: conv_id=jondoe_with_laex.pearl text="Hello World." data="Hello"
 	// Becomes: conv_id=jondoe_with_laex.pearl&text="Hello World"&data="Hello"
-
 	token := []byte(in)
 	counter := 0
 	i := 0
@@ -86,13 +90,9 @@ func (c *Commander) processCommandData(in string) map[string]string {
 	}
 
 	dataTokens := strings.Split(string(token), "&")
-	// conv_id=jondoe_with_laex.pearl&text="Hello World"&"data="Hello"
-	// [conv_id=jondoe_with_laex.pearl, text="Hello World", data="Hello"]
-
 	for _, dataToken := range dataTokens {
 		// We only want to split the string into two halves
-		// Ex: value="$(last_response cmd=scrape_entry_data)"
-		// => [value, "$(last_response cmd=scrape_entry_data)"]
+		// Ex: value="$(last_response cmd=scrape_entry_data)" => [value, "$(last_response cmd=scrape_entry_data)"]
 		// In the SplitN, the parameter 2 means only return two substrings
 		items := strings.SplitN(dataToken, "=", 2)
 
@@ -107,37 +107,36 @@ func (c *Commander) processCommandData(in string) map[string]string {
 }
 
 func (c *Commander) parseCommand(in string) (string, []string, map[string]string, string) {
-	// Commands can be nested.
-
-	// $() => function
-	// $COUNTER -> variable
-
-	// Sample command:
-	// repeat frequency=10 cmd="like id=$(last_response cmd=scrape_entry_data query=entry_data.TagPage[0].media.nodes[$(COUNTER)])"
-
-	// Output: command: repeat
-	//	   tokens: [repeat]
-	//	   data: [cmd:like, frequency:10, id="$(last_response cmd=scrape_entry_data query=entry_data.TagPage[0].media.nodes[$(COUNTER)])"]
-
-	// Regex tester
-	// https://regex-golang.appspot.com/assets/html/index.html
-
 	cmd, dataString, resultVar := c.parseCommandData(in)
 	data := c.processCommandData(dataString)
+	tokens := strings.Split(cmd, " ")
 
-	// Evaluate nested commands
-	newData := map[string]string{}
-	for key, value := range data {
-		if len(value) >= 3 && value[0] == '$' && value[1] == '(' {
-			out := exp.Eval(exp.Parse(value), "", "", func(in string) string {
-				return fmt.Sprintf("%v", c.Execute(in))
-			})
-			data[key] = out
-		}
+	node := exp.Parse(in).Prune()
+
+	if (&exp.ExpChecker{Node: node}).IsLoop() {
+		exp.Eval(node, "", "", func(inexp string) string {
+			return fmt.Sprintf("%v", c.Execute(inexp))
+		})
+		return tokens[0], tokens, data, resultVar
 	}
 
-	newData = data
+	if (&exp.ExpChecker{Node: node}).IsPool() {
+		c.loop.process(c)
+		exp.Eval(node, "", "", func(inexp string) string {
+			return fmt.Sprintf("%v", c.Execute(inexp))
+		})
+		return tokens[0], tokens, data, resultVar
+	}
 
-	tokens := strings.Split(cmd, " ")
-	return tokens[0], tokens, newData, resultVar
+	if c.loop != nil {
+		c.loop.batch = append(c.loop.batch, in)
+		return tokens[0], tokens, data, resultVar
+	}
+
+	// Non looping execution
+	exp.Eval(node, "", "", func(inexp string) string {
+		return fmt.Sprintf("%v", c.Execute(inexp))
+	})
+
+	return tokens[0], tokens, data, resultVar
 }

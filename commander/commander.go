@@ -2,6 +2,7 @@ package commander
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"html/template"
@@ -11,22 +12,45 @@ import (
 	"sync"
 
 	"github.com/go-yaml/yaml"
-	"github.com/peterh/liner"
-	"github.com/wsxiaoys/terminal/color"
 	"github.com/hemantasapkota/djangobot"
 	"github.com/hemantasapkota/goma"
+	exp "github.com/hemantasapkota/insta/expression"
+	"github.com/hemantasapkota/insta/flags"
+	"github.com/peterh/liner"
+	"github.com/wsxiaoys/terminal/color"
 )
 
 // A struct for logging the commands
 var cmdLog = &commandLog{Log: map[string]interface{}{}, Media: map[string]interface{}{}}
 var accountContext = ""
 
+// loop context
+type loopCtx struct {
+	index    int
+	endIndex int
+	varName  string
+	batch    []string
+}
+
+func (ctx *loopCtx) process(commander *Commander) {
+	for ctx.index <= ctx.endIndex {
+		for _, stmt := range ctx.batch {
+			node := exp.Parse(stmt).Prune()
+			exp.Eval(node, "", "", func(inexp string) string {
+				return fmt.Sprintf("%v", commander.Execute(inexp))
+			})
+		}
+		nextIndex := ctx.index + 1
+		commander.Store[ctx.varName] = nextIndex
+		ctx.index++
+	}
+}
+
+// command log
 type commandLog struct {
 	*goma.Object
-
-	logMu sync.Mutex
-	Log   map[string]interface{}
-
+	logMu   sync.Mutex
+	Log     map[string]interface{}
 	mediaMu sync.Mutex
 	Media   map[string]interface{}
 }
@@ -45,9 +69,11 @@ type Commander struct {
 	Intents   map[string]interface{}
 	Responses map[string]interface{}
 	Store     map[string]interface{}
-	Commands  map[string]cmdFunc
 
-	bot *djangobot.Bot
+	Commands map[string]cmdFunc
+
+	loop *loopCtx
+	bot  *djangobot.Bot
 }
 
 //New ...
@@ -58,11 +84,14 @@ func New(bot *djangobot.Bot) *Commander {
 		Store:     map[string]interface{}{},
 
 		Commands: map[string]cmdFunc{},
-		bot:      bot,
+
+		bot: bot,
 	}
 
 	accountContext = bot.Username
-	color.Print("@y> Press ? to list commands.")
+	if !flags.Silent {
+		color.Print("@y> Press ? to list commands.")
+	}
 	return commander
 }
 
@@ -76,13 +105,25 @@ func (c *Commander) LoadIntentsFromFile(filename string) *Commander {
 	return c
 }
 
-func (c *Commander) printYaml(m interface{}) {
-	yamlBody, err := yaml.Marshal(m)
-	if err != nil {
-		fmt.Println(err)
+func (c *Commander) printOutput(m interface{}) {
+	if flags.OutputFormat == "yaml" {
+		yamlBody, err := yaml.Marshal(m)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Printf("%s", string(yamlBody))
 		return
 	}
-	fmt.Printf("%s", string(yamlBody))
+
+	if flags.OutputFormat == "json" {
+		jsonBody, err := json.MarshalIndent(m, "", "    ")
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Printf("%s", string(jsonBody))
+	}
 }
 
 func (c *Commander) makeTemplate(tmpl string, params interface{}) (string, error) {
@@ -118,7 +159,6 @@ func (c *Commander) LoadIntents(intents []byte) error {
 
 	c.Intents = make(map[string]interface{})
 	err := yaml.Unmarshal(intents, c.Intents)
-
 	if err != nil {
 		return err
 	}
@@ -134,8 +174,8 @@ func (c *Commander) LoadIntents(intents []byte) error {
 	c.Commands["counter"] = c.Counter
 	c.Commands["download"] = c.Download
 
-	// Experimental commands
-	// c.Commands["repeat"] = c.Repeat
+	c.Commands["loop"] = c.Loop
+	c.Commands["pool"] = c.Pool
 
 	return nil
 }
@@ -150,7 +190,7 @@ func (c *Commander) PrintCommands() {
 
 //Execute ...
 func (c *Commander) Execute(command string) (result interface{}) {
-	cmd, tokens, data, resultVar := c.parseCommand(command)
+	cmd, tokens, data, resultVar := c.parseCommand(strings.TrimSpace(command))
 
 	// Execute the command
 	functor, ok := c.Commands[cmd]
@@ -160,7 +200,7 @@ func (c *Commander) Execute(command string) (result interface{}) {
 			return
 		}
 
-		c.printYaml(result)
+		c.printOutput(result)
 
 		// Store the result in c.Responses map
 		c.Store[resultVar] = result

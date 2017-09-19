@@ -2,17 +2,19 @@ package expression
 
 import (
 	"fmt"
+	"strings"
 )
 
 // Note: Command should start with $()
 // Parses: $(repeat frequency=10 cmd="$(like id=$(last_response cmd=scrape_entry_data query=entry_data.TagPage[0].tag.media.nodes[$(counter)].id)))
 
-// Into a stack of:
+// Into a chain of:
 // repeat frequency=10 cmd="$(like id=$(last_response cmd=scrape_entry_data query=entry_data.TagPage[0].tag.media.nodes[$(counter)].id))
 // like id=$(last_response cmd=scrape_entry_data query=entry_data.TagPage[0].tag.media.nodes[$(counter)].id)
 // last_response cmd=scrape_entry_data query=entry_data.TagPage[0].tag.media.nodes[$(counter)].id
 // counter
 
+//Node ...
 type Node struct {
 	Start int
 	End   int
@@ -21,26 +23,70 @@ type Node struct {
 	Next *Node
 }
 
+//Parse ...
 func Parse(command string) *Node {
-	node := parseCmd([]byte(command), []byte(command), 0)
+	expanded := expander{}.apply([]byte(command))
+	node := parseCmd(expanded, expanded, 0)
 	node = node.reverse()
 	return node
 }
 
+//Source ...
 func (node *Node) Source() string {
 	return string(node.Src)
 }
 
+//Depth ...
+func (node *Node) Length() int {
+	if node == nil {
+		return 0
+	}
+	count := 0
+	for cursor := node; cursor != nil; cursor = cursor.Next {
+		count++
+	}
+	return count
+}
+
+//Prune removes all nodes that are empty
+func (node *Node) Prune() *Node {
+	if node == nil {
+		return node
+	}
+
+	// Trim spaces from nodes
+	for head := node; head != nil; head = head.Next {
+		source := strings.TrimSpace(string(head.Src))
+		head.Src = []byte(source)
+		head.Start, head.End = 0, len(head.Src)-1
+	}
+
+	// Delete empty nodes: head, cursor and d
+	// h = head, c = cursor, d = node to be assigned
+	var h, c, d *Node = node, node.Next, nil
+	for c != nil {
+		if len(strings.TrimSpace(c.Source())) == 0 {
+			d = h
+			break
+		}
+		c = c.Next
+		h = h.Next
+	}
+	if d != nil {
+		d.Next = d.Next.Next
+	}
+	return node
+}
+
+//Print ...
 func (node *Node) Print() {
 	if node == nil {
 		return
 	}
-
 	for cursor := node; cursor != nil; {
-		fmt.Println(string(cursor.Src))
+		fmt.Println(cursor.Source())
 		cursor = cursor.Next
 	}
-
 }
 
 // $( $( $( $() ) ) )
@@ -56,16 +102,12 @@ func parseCmd(in []byte, sub []byte, start int) *Node {
 			n.Src[i] = ' '
 			break
 		}
-
+		// Parse nested command that starts with $(
 		if nextIndex := i + 1; nextIndex < len(n.Src) && n.Src[i] == '$' && n.Src[nextIndex] == '(' {
-			n.Src[i] = ' '
-			n.Src[i+1] = ' '
-			from := i + 2
-
-			n.Next = parseCmd(in, n.Src[from:], start+from)
+			n.Src[i], n.Src[nextIndex] = ' ', ' '
+			n.Next = parseCmd(in, n.Src[i:], start+i)
 		}
 	}
-
 	n.End = n.Start + n.End
 	n.Src = in[n.Start:n.End]
 
@@ -74,7 +116,6 @@ func parseCmd(in []byte, sub []byte, start int) *Node {
 
 func (node *Node) reverse() *Node {
 	doReverse := func() *Node {
-		// Init our three pointers
 		var head, next, cursor *Node = node, nil, nil
 		for head != nil {
 			next = head.Next
