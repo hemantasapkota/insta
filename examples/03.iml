@@ -1,0 +1,9 @@
+# Get data for the tag "latteart"
+$(get_data path=explore/tags/coffee => result)
+
+# Create a counter and assign it to i. Starts with 0
+$(counter => i)
+
+# Filter the result and get the link to first node's image source by using the counter variable
+$(filter var=result query=entry_data.TagPage[0].tag.media.nodes[$(`counter`)].display_src => url)
+

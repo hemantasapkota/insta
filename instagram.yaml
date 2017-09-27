@@ -5,10 +5,10 @@ get_data:
   Usage:  path=explore/tags/coffee (query), path=<<insta_id>>, path=p/<<code>> (post page)
 
 query:
-  Endpoint: https://www.instagram.com/query/
+  Endpoint: https://www.instagram.com/graphql/query/
   Method: post
   Log: false
-  Usage: q=(GraphQL syntax) ref=tags::show query_id=
+  Usage: query_id=17851374694183129 variables="{"id":"2291761151","first":20}"
 
 like:
   Endpoint: https://www.instagram.com/web/likes/{{ .ID }}/like/
@@ -35,6 +35,6 @@ add:
   Usage: id=1483759429887158585 comment_text= ( post id )
 
 download:
-  Usage: url=<<url>> 
+  Usage: url=<<url>>
   Log: true
   Usage: url=https://instagram.fsyd3-1.fna.fbcdn.net/t51.2885-15/e35/19052159_152125878664509_222614730546610176_n.jpg

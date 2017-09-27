@@ -1,0 +1,6 @@
+# Get data for the tag "latteart"
+$(get_data path=explore/tags/latteart => result)
+
+# Filter the result and get the link to first node's image source
+$(filter var=result query=entry_data.TagPage[0].tag.media.nodes[0].display_src => url)
+

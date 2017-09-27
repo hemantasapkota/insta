@@ -1,0 +1,26 @@
+# $(to_json "id":"2291761151" "first":20 => var)
+# $(query query_id="17851374694183129" variables="$(`var`)")
+
+# Get info about self
+
+$(get_data path=lexsapkota => profile)
+$(filter var=profile query=entry_data.ProfilePage[0] => profile)
+$(filter var=profile query=user.id => userId)
+
+# Get some vars
+$(filter var=profile query=user.id => userId)
+$(filter var=profile query=user.follows.count => followsCount)
+$(filter var=profile query=user.followed_by.count => followersCount)
+
+# Get the first 1000 followers
+
+$(query query_id="17851374694183129" variables={"id":"$(`userId`)","first":"$(`followersCount`)"} => followers)
+
+# $(query query_id="17851374694183129" variables={"id":"2291761151","first":"10"} => followers)
+
+# Get all following
+# $(query query_id="17874545323001329" variables={"id":"2291761151","first":10} => following)
+
+# $(loop range=0,9)
+#   $(filter var=following query=data.user.edge_follow.edges[$(`i`)].node.username)
+# $(pool)

@@ -1,0 +1,2 @@
+# Get data for the tag "latteart"
+$(get_data path=explore/tags/latteart => result)

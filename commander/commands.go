@@ -164,6 +164,12 @@ func _jsonQuery(result interface{}, data map[string]string) interface{} {
 	obj, err = jq.Object(queryTokens...)
 	if err != nil {
 		obj, err = jq.String(queryTokens...)
+		if err != nil {
+			obj, err = jq.Int(queryTokens...)
+			if err != nil {
+				obj, err = jq.Bool(queryTokens...)
+			}
+		}
 	}
 
 	if err != nil {

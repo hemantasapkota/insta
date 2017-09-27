@@ -1,0 +1,32 @@
+# Script Spec V1
+
+# Command Structure:
+# $() is an expression that is evaluated
+# $( $( $() ) ) supports nested expression
+# $(cmd... => i ) expression before => is evaluated. Result assigned to i
+# Nested command should be wrapped in quotes. Exception for array indices.
+#   Example:    $(download url="$(`url`)")
+#   Exception:  $(filter var=result query=entry_data.TagPage[0].tag.media.nodes[$(`i`)].display_src => url)
+# Only one nested command supported. The following wouldn't work.
+#   $(query query_id="17851374694183129" variables={"id":"$(`userId`)","first":$(`followersCount`)} => followers)
+#
+# Control Commands:
+#   counter: Creates a counter
+#
+#   Loops
+#     loop: Starts loop node. Batch all further commands until pool is encountered.
+#     pool: End batch collection. Process all the items.
+#     Example:
+#       $(loop range=0,9 => i)
+#           $(filter var=result query=entry_data.TagPage[0].tag.media.nodes[$(`i`)].display_src => url)
+#           $(download url="$(`url`)")
+#       $(pool)
+#
+#      Nested loop not supported yet.
+
+# Shorthands
+# $(`i`) is rewritten as $(filter var=i)
+
+#> profile bot
+#   Specifies the profile. Profile defines bot behaviour.
+#   Status: TODO

@@ -1,0 +1,8 @@
+# Queries for the tag coffee, loops through the result 5 times,
+# filters the image url from the result and downloads it.
+$(get_data path=explore/tags/coffee => result)
+
+$(loop range=0,5 => i)
+  $(filter var=result query=entry_data.TagPage[0].tag.media.nodes[$(`i`)].display_src => url)
+  $(download url="$(`url`)")
+$(pool)

@@ -1,0 +1,4 @@
+# Get an account's user id
+$(get_data path=lexsapkota => profile)
+$(filter var=profile query=entry_data.ProfilePage[0] => profile)
+$(filter var=profile query=user.id => userId)
