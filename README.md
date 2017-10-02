@@ -1,3 +1,5 @@
+[![Go Report Card](https://goreportcard.com/badge/github.com/hemantasapkota/insta)](https://goreportcard.com/report/github.com/hemantasapkota/insta)
+
 # Insta - Power tool for Instagram.
 
 Insta is a command line power tool for Instagram. With it, you can like, follow, comment and query Instagram.
@@ -60,6 +62,7 @@ $(pool)
 ```
 
 The script queries for the tag *coffee*, loops through the result 5 times, filters the image url from the result and downloads it.
+See the examples folder for more sample scripts.
 
 # Roadmap
 

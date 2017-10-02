@@ -5,15 +5,6 @@ import (
 	"strings"
 )
 
-// Note: Command should start with $()
-// Parses: $(repeat frequency=10 cmd="$(like id=$(last_response cmd=scrape_entry_data query=entry_data.TagPage[0].tag.media.nodes[$(counter)].id)))
-
-// Into a chain of:
-// repeat frequency=10 cmd="$(like id=$(last_response cmd=scrape_entry_data query=entry_data.TagPage[0].tag.media.nodes[$(counter)].id))
-// like id=$(last_response cmd=scrape_entry_data query=entry_data.TagPage[0].tag.media.nodes[$(counter)].id)
-// last_response cmd=scrape_entry_data query=entry_data.TagPage[0].tag.media.nodes[$(counter)].id
-// counter
-
 //Node ...
 type Node struct {
 	Start int
@@ -36,7 +27,7 @@ func (node *Node) Source() string {
 	return string(node.Src)
 }
 
-//Depth ...
+//Length ...
 func (node *Node) Length() int {
 	if node == nil {
 		return 0

@@ -1,6 +1,6 @@
 package expression
 
-// Expression Checker ...
+// ExpChecker ...
 type ExpChecker struct {
 	Node *Node
 }

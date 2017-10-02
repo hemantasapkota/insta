@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// Eval ...
 func Eval(node *Node, prevCmd string, prevOutput string, evaluator func(string) string) string {
 	if node == nil {
 		return ""
