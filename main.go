@@ -2,9 +2,9 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"strings"
-	"fmt"
 
 	"github.com/hemantasapkota/djangobot"
 	"github.com/hemantasapkota/goma/gomadb"
@@ -20,7 +20,7 @@ import (
 func main() {
 	username := flag.String("username", "", "")
 	password := flag.String("password", "", "")
-	account := flag.String("account", "", "Account from .credentials.yaml") 
+	account := flag.String("account", "", "Account from .credentials.yaml")
 	exec := flag.String("exec", "", "Execute a command")
 	execFile := flag.String("execFile", "", "Execute file")
 
@@ -76,7 +76,7 @@ func main() {
 				color.Println("@yAuthenticating with account: ", strings.TrimSpace(accountName))
 			}
 		} else {
-			if *account == "" { 
+			if *account == "" {
 				flag.PrintDefaults()
 				return
 			}
@@ -127,7 +127,7 @@ func main() {
 	// execute script file
 	if *execFile != "" {
 		commandHandler.Execute(fmt.Sprintf(`run_script file="%s"`, *execFile))
-		return 
+		return
 	}
 
 	commandHandler.Listen()

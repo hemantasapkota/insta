@@ -13,6 +13,10 @@
 # Control Commands:
 #   counter: Creates a counter
 #
+#   If
+#     Every command can include an optional if condition which determines if that command gets executed or not
+#     Ex: $(unfollow id="$(`followingID`)" if="$(`fullName`) matches Tamang")
+#
 #   Loops
 #     loop: Starts loop node. Batch all further commands until pool is encountered.
 #     pool: End batch collection. Process all the items.
@@ -30,3 +34,9 @@
 #> profile bot
 #   Specifies the profile. Profile defines bot behaviour.
 #   Status: TODO
+
+# $(delay) can be used to control the timing of an operation. Interval in seconds.
+# $(delay interval=5)
+#   $(unfollow id="$(`followingID`)")
+# $(nodelay)
+

@@ -112,15 +112,16 @@ func (c *Commander) parseCommand(in string) (string, []string, map[string]string
 	tokens := strings.Split(cmd, " ")
 
 	node := exp.Parse(in).Prune()
+	expChecker := &exp.ExpChecker{Node: node}
 
-	if (&exp.ExpChecker{Node: node}).IsLoop() {
+	if expChecker.IsLoop() {
 		exp.Eval(node, "", "", func(inexp string) string {
 			return fmt.Sprintf("%v", c.Execute(inexp))
 		})
 		return tokens[0], tokens, data, resultVar
 	}
 
-	if (&exp.ExpChecker{Node: node}).IsPool() {
+	if expChecker.IsPool() {
 		c.loop.process(c)
 		exp.Eval(node, "", "", func(inexp string) string {
 			return fmt.Sprintf("%v", c.Execute(inexp))

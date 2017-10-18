@@ -5,7 +5,7 @@ type ExpChecker struct {
 	Node *Node
 }
 
-//IsLoop ...
+// IsLoop ...
 func (e *ExpChecker) IsLoop() bool {
 	if e.Node == nil {
 		return false
@@ -15,7 +15,7 @@ func (e *ExpChecker) IsLoop() bool {
 	return length > 0 && string(src[:4]) == "loop"
 }
 
-//IsPool ...
+// IsPool ...
 func (e *ExpChecker) IsPool() bool {
 	if e.Node.Src == nil {
 		return false

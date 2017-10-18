@@ -10,6 +10,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/go-yaml/yaml"
 	"github.com/hemantasapkota/djangobot"
@@ -69,11 +70,11 @@ type Commander struct {
 	Intents   map[string]interface{}
 	Responses map[string]interface{}
 	Store     map[string]interface{}
+	Commands  map[string]cmdFunc
 
-	Commands map[string]cmdFunc
-
-	loop *loopCtx
-	bot  *djangobot.Bot
+	loop     *loopCtx
+	bot      *djangobot.Bot
+	cmdDelay int
 }
 
 //New ...
@@ -82,10 +83,8 @@ func New(bot *djangobot.Bot) *Commander {
 		Intents:   map[string]interface{}{},
 		Responses: map[string]interface{}{},
 		Store:     map[string]interface{}{},
-
-		Commands: map[string]cmdFunc{},
-
-		bot: bot,
+		Commands:  map[string]cmdFunc{},
+		bot:       bot,
 	}
 
 	accountContext = bot.Username
@@ -176,6 +175,8 @@ func (c *Commander) LoadIntents(intents []byte) error {
 
 	c.Commands["loop"] = c.Loop
 	c.Commands["pool"] = c.Pool
+	c.Commands["delay"] = c.Delay
+	c.Commands["nodelay"] = c.Nodelay
 
 	return nil
 }
@@ -192,20 +193,36 @@ func (c *Commander) PrintCommands() {
 func (c *Commander) Execute(command string) (result interface{}) {
 	cmd, tokens, data, resultVar := c.parseCommand(strings.TrimSpace(command))
 
-	// Execute the command
 	functor, ok := c.Commands[cmd]
 	if ok {
+		if c.cmdDelay > 0 {
+			time.Sleep(time.Second * time.Duration(c.cmdDelay))
+		}
+
+		// Should this block be executed
+		// TODO: Refactor IF condition checking
+		ifBlock, ok := data["if"]
+		if ok {
+			components := strings.Split(ifBlock, " ")
+			if len(components) == 3 {
+				if components[1] == "contains" {
+					ifResult := strings.Contains(components[0], components[2])
+					fmt.Printf(`if="%s:%v"\n`, ifBlock, ifResult)
+					if !ifResult {
+						return
+					}
+				}
+			}
+		}
+
 		result = functor(cmd, tokens, data)
 		if result == nil {
 			return
 		}
 
 		c.printOutput(result)
-
-		// Store the result in c.Responses map
 		c.Store[resultVar] = result
 
-		// Log command and result
 		intentObj, ok := c.Intents[cmd]
 		if ok {
 			intent := intentObj.(map[interface{}]interface{})
