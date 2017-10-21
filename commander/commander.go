@@ -37,7 +37,7 @@ func (ctx *loopCtx) process(commander *Commander) {
 	for ctx.index <= ctx.endIndex {
 		for _, stmt := range ctx.batch {
 			node := exp.Parse(stmt).Prune()
-			exp.Eval(node, "", "", func(inexp string) string {
+			exp.Eval(node, "", "", map[string]string{}, func(inexp string) string {
 				return fmt.Sprintf("%v", commander.Execute(inexp))
 			})
 		}
@@ -203,11 +203,11 @@ func (c *Commander) Execute(command string) (result interface{}) {
 		// TODO: Refactor IF condition checking
 		ifBlock, ok := data["if"]
 		if ok {
-			components := strings.Split(ifBlock, " ")
+			components := strings.Split(ifBlock, "_")
 			if len(components) == 3 {
+				components[0] = strings.Replace(components[0], "\"", "", -1)
 				if components[1] == "contains" {
 					ifResult := strings.Contains(components[0], components[2])
-					fmt.Printf(`if="%s:%v"\n`, ifBlock, ifResult)
 					if !ifResult {
 						return
 					}
