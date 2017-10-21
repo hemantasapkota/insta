@@ -7,7 +7,8 @@
 # Nested command should be wrapped in quotes. Exception for array indices.
 #   Example:    $(download url="$(`url`)")
 #   Exception:  $(filter var=result query=entry_data.TagPage[0].tag.media.nodes[$(`i`)].display_src => url)
-# Only one nested command supported. The following wouldn't work.
+#
+# Nested command works with multiple siblings. Ex:
 #   $(query query_id="17851374694183129" variables={"id":"$(`userId`)","first":$(`followersCount`)} => followers)
 #
 # Control Commands:
@@ -15,7 +16,8 @@
 #
 #   If
 #     Every command can include an optional if condition which determines if that command gets executed or not
-#     Ex: $(unfollow id="$(`followingID`)" if="$(`fullName`) matches Tamang")
+#     Ex: $(unfollow id="$(`followingID`)" if="$(`fullName`)_contains_Tamang")
+#     Currently supported IF conditions: $(var1)_contains_$(var2)
 #
 #   Loops
 #     loop: Starts loop node. Batch all further commands until pool is encountered.
@@ -31,12 +33,11 @@
 # Shorthands
 # $(`i`) is rewritten as $(filter var=i)
 
-#> profile bot
-#   Specifies the profile. Profile defines bot behaviour.
-#   Status: TODO
-
 # $(delay) can be used to control the timing of an operation. Interval in seconds.
 # $(delay interval=5)
 #   $(unfollow id="$(`followingID`)")
 # $(nodelay)
 
+#> profile bot
+#   Specifies the profile. Profile defines bot behaviour.
+#   Status: TODO
