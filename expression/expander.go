@@ -27,11 +27,9 @@ func (op expander) applyOnce(in []byte) []byte {
 	if in == nil {
 		return nil
 	}
-
 	counter := 0
 	start := -1
 	end := -1
-
 	isValidLeft := func(index int) bool {
 		a := index - 1
 		b := index - 2
@@ -40,7 +38,6 @@ func (op expander) applyOnce(in []byte) []byte {
 		}
 		return in[a] == '(' && in[b] == '$'
 	}
-
 	isValidRight := func(index int) bool {
 		c := index + 1
 		if c >= len(in) {
@@ -48,7 +45,6 @@ func (op expander) applyOnce(in []byte) []byte {
 		}
 		return in[c] == ')'
 	}
-
 	for i := 0; i < len(in); i++ {
 		if in[i] == '`' {
 			if isValidLeft(i) && counter == 0 {
@@ -61,10 +57,8 @@ func (op expander) applyOnce(in []byte) []byte {
 			}
 		}
 	}
-
 	var unroled string
 	rest := in[end+1:]
-
 	newslice := make([]byte, 0)
 	if start > 0 && end != -1 && end < len(in) {
 		unroled = fmt.Sprintf("filter var=%s", string(in[start+1:end]))
@@ -74,6 +68,5 @@ func (op expander) applyOnce(in []byte) []byte {
 	} else {
 		newslice = in
 	}
-
 	return newslice
 }

@@ -4,6 +4,8 @@
 # $() is an expression that is evaluated
 # $( $( $() ) ) supports nested expression
 # $(cmd... => i ) expression before => is evaluated. Result assigned to i
+# $(cmd... ==> arr) expresison before ==> is evaluated. Result appended to arr
+
 # Nested command should be wrapped in quotes. Exception for array indices.
 #   Example:    $(download url="$(`url`)")
 #   Exception:  $(filter var=result query=entry_data.TagPage[0].tag.media.nodes[$(`i`)].display_src => url)

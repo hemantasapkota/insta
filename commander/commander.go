@@ -191,7 +191,7 @@ func (c *Commander) PrintCommands() {
 
 //Execute ...
 func (c *Commander) Execute(command string) (result interface{}) {
-	cmd, tokens, data, resultVar := c.parseCommand(strings.TrimSpace(command))
+	cmd, tokens, data, resultVar, assignType := c.parseCommand(strings.TrimSpace(command))
 
 	functor, ok := c.Commands[cmd]
 	if ok {
@@ -205,13 +205,16 @@ func (c *Commander) Execute(command string) (result interface{}) {
 		if ok {
 			components := strings.Split(ifBlock, "_")
 			if len(components) == 3 {
-				components[0] = strings.Replace(components[0], "\"", "", -1)
 				if components[1] == "contains" {
 					ifResult := strings.Contains(components[0], components[2])
 					if !ifResult {
 						return
 					}
+				} else {
+					return
 				}
+			} else {
+				return
 			}
 		}
 
@@ -221,7 +224,21 @@ func (c *Commander) Execute(command string) (result interface{}) {
 		}
 
 		c.printOutput(result)
-		c.Store[resultVar] = result
+		if resultVar != "" {
+			if assignType == "=>" {
+				c.Store[resultVar] = result
+			}
+			// append
+			if assignType == "==>" {
+				_, ok := c.Store[resultVar]
+				if !ok {
+					c.Store[resultVar] = make([]interface{}, 0)
+				}
+				list := c.Store[resultVar].([]interface{})
+				list = append(list, result)
+				c.Store[resultVar] = list
+			}
+		}
 
 		intentObj, ok := c.Intents[cmd]
 		if ok {

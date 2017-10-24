@@ -32,18 +32,20 @@ func (c *Commander) unwrapQuotes(in string) (out string) {
 	return
 }
 
-func (c *Commander) parseCommandData(in string) (cmdStr string, dataString string, resultStr string) {
-	// Input command:
-	// repeat frequency=10 cmd="$(like id=$(last_response cmd=scrape_entry_data query=entry_data.TagPage[0].media.nodes[$(COUNTER)]))"
-	// Output:
-	// frequency=10 cmd="like id=$(last_response cmd=scrape_entry_data query=entry_data.TagPage[0].media.nodes[$COUNTER])"
-
-	// https://regex-golang.appspot.com/assets/html/index.html
+func (c *Commander) parseCommandData(in string) (cmdStr string, dataString string, resultStr string, assignType string) {
 	leftRight := strings.Split(in, "=>")
 	if len(leftRight) > 1 {
 		resultStr = strings.TrimSpace(leftRight[1])
+		assignType = "=>"
 	}
 
+	leftRight = strings.Split(in, "==>")
+	if len(leftRight) > 1 {
+		resultStr = strings.TrimSpace(leftRight[1])
+		assignType = "==>"
+	}
+
+	// https://regex-golang.appspot.com/assets/html/index.html
 	regex, _ := regexp.Compile(`\w+\=.+`)
 
 	cmd := leftRight[0]
@@ -106,8 +108,8 @@ func (c *Commander) processCommandData(in string) map[string]string {
 	return data
 }
 
-func (c *Commander) parseCommand(in string) (string, []string, map[string]string, string) {
-	cmd, dataString, resultVar := c.parseCommandData(in)
+func (c *Commander) parseCommand(in string) (string, []string, map[string]string, string, string) {
+	cmd, dataString, resultVar, assignType := c.parseCommandData(in)
 	data := c.processCommandData(dataString)
 	tokens := strings.Split(cmd, " ")
 
@@ -118,7 +120,7 @@ func (c *Commander) parseCommand(in string) (string, []string, map[string]string
 		exp.Eval(node, "", "", map[string]string{}, func(inexp string) string {
 			return fmt.Sprintf("%v", c.Execute(inexp))
 		})
-		return tokens[0], tokens, data, resultVar
+		return tokens[0], tokens, data, resultVar, assignType
 	}
 
 	if expChecker.IsPool() {
@@ -126,12 +128,12 @@ func (c *Commander) parseCommand(in string) (string, []string, map[string]string
 		exp.Eval(node, "", "", map[string]string{}, func(inexp string) string {
 			return fmt.Sprintf("%v", c.Execute(inexp))
 		})
-		return tokens[0], tokens, data, resultVar
+		return tokens[0], tokens, data, resultVar, assignType
 	}
 
 	if c.loop != nil {
 		c.loop.batch = append(c.loop.batch, in)
-		return tokens[0], tokens, data, resultVar
+		return tokens[0], tokens, data, resultVar, assignType
 	}
 
 	// Non looping execution
@@ -139,5 +141,5 @@ func (c *Commander) parseCommand(in string) (string, []string, map[string]string
 		return fmt.Sprintf("%v", c.Execute(inexp))
 	})
 
-	return tokens[0], tokens, data, resultVar
+	return tokens[0], tokens, data, resultVar, assignType
 }

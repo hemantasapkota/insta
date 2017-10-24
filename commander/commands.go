@@ -196,7 +196,31 @@ func (c *Commander) Filter(command string, tokens []string, data map[string]stri
 		return result
 	}
 
-	return _jsonQuery(result, data)
+	if result, ok := result.(bool); ok {
+		return result
+	}
+
+	if result, ok := result.(map[string]interface{}); ok {
+		return _jsonQuery(result, data)
+	}
+
+	if result, ok := result.([]interface{}); ok {
+		// get index
+		index, err := strconv.Atoi(data["query"])
+		if err != nil {
+			return fmt.Sprintf("%v", result)
+		}
+		// Check bounds
+		if index < 0 {
+			index = 0
+		}
+		if index >= len(result) {
+			index = len(result) - 1
+		}
+		return result[index]
+	}
+
+	return ""
 }
 
 func (c *Commander) RunScript(command string, token []string, data map[string]string) interface{} {
