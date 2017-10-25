@@ -8,11 +8,8 @@ import (
 func TestCommandNode(t *testing.T) {
 	var source string
 	var cmd *Node
-
-	// Test 2
 	source = `$(like id="$(last_response cmd=scrape_entry_data query=entry_data.TagPage[0].tag.media.nodes[$(counter)].id)")"`
 	cmd = Parse(source)
-
 	output := Eval(cmd, "", "", map[string]string{}, func(in string) string {
 		t.Log(strings.TrimSpace(in))
 		switch strings.TrimSpace(in) {
@@ -27,7 +24,6 @@ func TestCommandNode(t *testing.T) {
 		}
 		return "NA"
 	})
-
 	if output != "Success" {
 		t.Log("Failed eval.")
 	}
@@ -36,7 +32,6 @@ func TestCommandNode(t *testing.T) {
 func TestEval1(t *testing.T) {
 	source := "$(filter var=result query=entry_data.TagPage[0].tag.media.nodes[$(`i`)].display_src)"
 	cmd := Parse(source)
-
 	output := Eval(cmd, "", "", map[string]string{}, func(in string) string {
 		t.Log(strings.TrimSpace(in))
 		switch strings.TrimSpace(in) {
@@ -48,7 +43,6 @@ func TestEval1(t *testing.T) {
 		}
 		return "NA"
 	})
-
 	if output != "asdfasd" {
 		t.Error("Failed eval.")
 	}
@@ -57,11 +51,9 @@ func TestEval1(t *testing.T) {
 func TestNestedSiblings(t *testing.T) {
 	source := "$(unfollow id=\"$(`followingID`)\" if=\"$(`fullName`)_contains_$(`lastName`)\")"
 	cmd := Parse(source).Prune()
-
 	if len(cmd.Siblings) != 2 {
 		t.Error("Incorrect number of siblings.")
 	}
-
 	output := Eval(cmd, "", "", map[string]string{}, func(in string) string {
 		source := strings.TrimSpace(in)
 		t.Log(source)
@@ -81,10 +73,8 @@ func TestNestedSiblings(t *testing.T) {
 		}
 		return "NA"
 	})
-
 	if output != "Success" {
 		t.Error("Failed eval.")
 	}
-
 	t.Log(output)
 }

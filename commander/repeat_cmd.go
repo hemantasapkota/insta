@@ -2,24 +2,23 @@ package commander
 
 import (
 	"fmt"
-	"github.com/wsxiaoys/terminal/color"
 	"strconv"
 	"time"
+
+	"github.com/wsxiaoys/terminal/color"
 )
 
-// Experimental
+// Repeat ...
 func (c *Commander) Repeat(command string, tokens []string, data map[string]string) (result interface{}) {
 	if len(data) == 0 {
 		color.Println("@r", command, " frequency=(in seconds) cmd=")
 		return
 	}
-
 	frequency, err := strconv.Atoi(data["frequency"])
 	if err != nil {
 		fmt.Println("Frequency not set.")
 		return
 	}
-
 	cmdToExec := data["cmd"]
 	go func(in string) {
 		remaining := frequency
@@ -35,6 +34,5 @@ func (c *Commander) Repeat(command string, tokens []string, data map[string]stri
 			}
 		}
 	}(cmdToExec)
-
 	return
 }

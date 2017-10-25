@@ -86,7 +86,6 @@ func New(bot *djangobot.Bot) *Commander {
 		Commands:  map[string]cmdFunc{},
 		bot:       bot,
 	}
-
 	accountContext = bot.Username
 	if !flags.Silent {
 		color.Print("@y> Press ? to list commands.")
@@ -192,14 +191,11 @@ func (c *Commander) PrintCommands() {
 //Execute ...
 func (c *Commander) Execute(command string) (result interface{}) {
 	cmd, tokens, data, resultVar, assignType := c.parseCommand(strings.TrimSpace(command))
-
 	functor, ok := c.Commands[cmd]
 	if ok {
 		if c.cmdDelay > 0 {
 			time.Sleep(time.Second * time.Duration(c.cmdDelay))
 		}
-
-		// Should this block be executed
 		// TODO: Refactor IF condition checking
 		ifBlock, ok := data["if"]
 		if ok {
@@ -217,12 +213,10 @@ func (c *Commander) Execute(command string) (result interface{}) {
 				return
 			}
 		}
-
 		result = functor(cmd, tokens, data)
 		if result == nil {
 			return
 		}
-
 		c.printOutput(result)
 		if resultVar != "" {
 			if assignType == "=>" {

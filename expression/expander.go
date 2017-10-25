@@ -12,8 +12,7 @@ func (op expander) size(in []byte) int {
 	if in == nil {
 		return 0
 	}
-	count := strings.Count(string(in), "$(")
-	return count
+	return strings.Count(string(in), "$(")
 }
 
 func (op expander) apply(in []byte) []byte {
