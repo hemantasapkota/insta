@@ -1,7 +1,6 @@
 package commander
 
 import (
-	"container/list"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -10,13 +9,11 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/jmoiron/jsonq"
 	"github.com/wsxiaoys/terminal/color"
 )
 
@@ -62,7 +59,7 @@ func (c *Commander) RequestExecutorCmd(command string, tokens []string, data map
 	return m
 }
 
-//GetDataCmd ...
+// GetDataCmd ...
 func (c *Commander) GetDataCmd(command string, tokens []string, data map[string]string) interface{} {
 	intent := c.Intents[command].(map[interface{}]interface{})
 	if len(data) == 0 {
@@ -94,131 +91,12 @@ func (c *Commander) GetDataCmd(command string, tokens []string, data map[string]
 	return m
 }
 
-func _jsonQuery(result interface{}, data map[string]string) interface{} {
-	if result == nil {
-		return map[string]interface{}{}
-	}
-
-	// JSON Object -> Query
-	jq := jsonq.NewQuery(result)
-
-	// Get our query components
-	qComponents := func(in string) []string {
-		return strings.Split(in, ".")
-	}
-
-	// Process array notation ex: TagPage[0], ProfilePage[0]
-	qProcessArray := func(in []string) []string {
-		// Regex to find array notation ex: TagPage[0], TagPage[1], TagPage[10]
-		rgx, err := regexp.Compile(`\[.+\]`)
-		if err != nil {
-			return in
-		}
-
-		lst := list.New()
-		for _, token := range in {
-			if rgx.MatchString(token) {
-				match := rgx.FindString(token)
-
-				// Tag[0] -> Tag
-				token = strings.Replace(token, match, "", -1)
-
-				// Nex: [0] -> 0
-				match = strings.Replace(match, "[", "", -1)
-				match = strings.Replace(match, "]", "", -1)
-
-				// Append match to our input array
-				lst.PushBack(token)
-				lst.PushBack(match)
-
-			} else {
-				lst.PushBack(token)
-			}
-		}
-
-		// Go through the list
-		out := []string{}
-		for e := lst.Front(); e != nil; e = e.Next() {
-			out = append(out, e.Value.(string))
-		}
-
-		return out
-	}
-
-	queryTokens := qProcessArray(qComponents(data["query"]))
-	var obj interface{}
-	var err error
-
-	obj, err = jq.Object(queryTokens...)
-	if err != nil {
-		obj, err = jq.String(queryTokens...)
-		if err != nil {
-			obj, err = jq.Int(queryTokens...)
-			if err != nil {
-				obj, err = jq.Bool(queryTokens...)
-			}
-		}
-	}
-
-	if err != nil {
-		log.Println(err)
-		return nil
-	}
-
-	return obj
-}
-
-// Filter ...
-func (c *Commander) Filter(command string, tokens []string, data map[string]string) interface{} {
-	if len(data) == 0 || data["var"] == "" {
-		color.Println("@r", command, "var=result query=entry_data.TagPage[0].tag.media.nodes[0].display_src")
-		return nil
-	}
-
-	result := c.Store[data["var"]]
-
-	if result, ok := result.(string); ok {
-		return result
-	}
-
-	if result, ok := result.(int); ok {
-		return result
-	}
-
-	if result, ok := result.(bool); ok {
-		return result
-	}
-
-	if result, ok := result.(map[string]interface{}); ok {
-		return _jsonQuery(result, data)
-	}
-
-	if result, ok := result.([]interface{}); ok {
-		// get index
-		index, err := strconv.Atoi(data["query"])
-		if err != nil {
-			return fmt.Sprintf("%v", result)
-		}
-		// Check bounds
-		if index < 0 {
-			index = 0
-		}
-		if index >= len(result) {
-			index = len(result) - 1
-		}
-		return result[index]
-	}
-
-	return ""
-}
-
 // RunScript ...
 func (c *Commander) RunScript(command string, token []string, data map[string]string) interface{} {
 	if len(data) == 0 {
 		color.Println("@r", command, "file=")
 		return nil
 	}
-
 	file, ok := data["file"]
 	if ok {
 		// path =
@@ -228,13 +106,11 @@ func (c *Commander) RunScript(command string, token []string, data map[string]st
 			color.Println("@r", command, err)
 			return nil
 		}
-
 		dataStr := strings.TrimSpace(string(data))
 		if len(dataStr) == 0 {
 			color.Println("@r", command, "Script Empty.")
 			return nil
 		}
-
 		scripts := strings.Split(dataStr, "\n")
 		for _, statement := range scripts {
 			// ignore empty strings or comments
@@ -245,11 +121,10 @@ func (c *Commander) RunScript(command string, token []string, data map[string]st
 			}
 		}
 	}
-
 	return nil
 }
 
-//Counter ...
+// Counter ...
 func (c *Commander) Counter(command string, tokens []string, data map[string]string) interface{} {
 	updateVal, ok := data["set"]
 	if ok {
@@ -260,14 +135,12 @@ func (c *Commander) Counter(command string, tokens []string, data map[string]str
 		c.Store[command] = intVal
 		return updateVal
 	}
-
 	val, ok := c.Store[command]
 	if ok {
 		val = val.(int) + 1
 		c.Store[command] = val
 		return val
 	}
-
 	c.Store[command] = 0
 	return 0
 }
@@ -279,25 +152,21 @@ func (c *Commander) Download(command string, tokens []string, data map[string]st
 		color.Println("@r ", command, intent["Usage"])
 		return nil
 	}
-
 	_url, ok := data["url"]
 	if !ok || _url == "" {
 		color.Println("@r ", command, intent["Usage"])
 		return nil
 	}
-
 	_, body, errs := c.bot.Client.Get(_url).EndBytes()
 	if errs != nil {
 		color.Println("@r", command, errs[0])
 		return nil
 	}
-
 	u, err := url.Parse(_url)
 	if err != nil {
 		color.Println("@r", command, errs[0])
 		return nil
 	}
-
 	go func() {
 		dir := filepath.Join(".", "downloads")
 		_ = os.MkdirAll(dir, os.ModePerm)
@@ -311,12 +180,9 @@ func (c *Commander) Download(command string, tokens []string, data map[string]st
 			}
 		}
 	}()
-
 	cmdLog.mediaMu.Lock()
 	defer cmdLog.mediaMu.Unlock()
-
 	cmdLog.Media[_url] = body
 	cmdLog.Save(cmdLog)
-
 	return "Downloaded " + _url
 }

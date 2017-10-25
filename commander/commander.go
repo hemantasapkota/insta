@@ -202,7 +202,7 @@ func (c *Commander) Execute(command string) (result interface{}) {
 			components := strings.Split(ifBlock, "_")
 			if len(components) == 3 {
 				if components[1] == "contains" {
-					ifResult := strings.Contains(components[0], components[2])
+					ifResult := strings.Contains(strings.ToLower(components[0]), strings.ToLower(components[2]))
 					if !ifResult {
 						return
 					}

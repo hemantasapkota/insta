@@ -34,6 +34,7 @@
 
 # Shorthands
 # $(`i`) is rewritten as $(filter var=i)
+# $(`#i`) returns the length if "i" is an array
 
 # $(delay) can be used to control the timing of an operation. Interval in seconds.
 # $(delay interval=5)
