@@ -111,6 +111,7 @@ func main() {
 	}
 	// execute script file
 	if *execFile != "" {
+		flags.ExecFile = true
 		commandHandler.Execute(fmt.Sprintf(`run_script file="%s"`, *execFile))
 		return
 	}

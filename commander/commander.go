@@ -113,7 +113,6 @@ func (c *Commander) printOutput(m interface{}) {
 		fmt.Printf("%s", string(yamlBody))
 		return
 	}
-
 	if flags.OutputFormat == "json" {
 		jsonBody, err := json.MarshalIndent(m, "", "    ")
 		if err != nil {
@@ -121,6 +120,9 @@ func (c *Commander) printOutput(m interface{}) {
 			return
 		}
 		fmt.Printf("%s", string(jsonBody))
+	}
+	if flags.ExecFile {
+		println()
 	}
 }
 
@@ -182,6 +184,23 @@ func (c *Commander) PrintCommands() {
 	}
 }
 
+func evalIfBlock(ifBlock string) (bool, error) {
+	components := strings.Split(ifBlock, "_")
+	if !(len(components) == 3) {
+		return false, errors.New("if block should have three components")
+	}
+	var result bool
+	switch components[1] {
+	case "contains":
+		result = strings.Contains(strings.ToLower(components[0]), strings.ToLower(components[2]))
+	case "equals":
+		result = strings.ToLower(components[0]) == strings.ToLower(components[2])
+	default:
+		return false, errors.New("unknown if condition")
+	}
+	return result, nil
+}
+
 // Execute ...
 func (c *Commander) Execute(command string) (result interface{}) {
 	cmd, tokens, data, resultVar, assignType := c.parseCommand(strings.TrimSpace(command))
@@ -194,19 +213,27 @@ func (c *Commander) Execute(command string) (result interface{}) {
 		// TODO: Refactor IF condition checking
 		ifBlock, ok := data["if"]
 		if ok {
-			components := strings.Split(ifBlock, "_")
-			if len(components) == 3 {
-				if components[1] == "contains" {
-					ifResult := strings.Contains(strings.ToLower(components[0]), strings.ToLower(components[2]))
-					if !ifResult {
-						return
-					}
-				} else {
-					return
-				}
-			} else {
+			ifResult, err := evalIfBlock(ifBlock)
+			if err != nil {
 				return
 			}
+			// fmt.Printf("if result is: %v", ifResult)
+			if !ifResult {
+				return
+			}
+			// components := strings.Split(ifBlock, "_")
+			// if len(components) == 3 {
+			// 	if components[1] == "contains" {
+			// 		ifResult := strings.Contains(strings.ToLower(components[0]), strings.ToLower(components[2]))
+			// 		if !ifResult {
+			// 			return
+			// 		}
+			// 	} else {
+			// 		return
+			// 	}
+			// } else {
+			// 	return
+			// }
 		}
 		result = functor(cmd, tokens, data)
 		if result == nil {
