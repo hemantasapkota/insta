@@ -1,0 +1,12 @@
+# Example of multiple loops
+$(loop range=0,99 => i)
+  $(counter)
+$(pool)
+
+$(loop range=0,99 => i)
+  $(counter)
+$(pool)
+
+$(loop range=0,99 => i)
+  $(counter)
+$(pool)

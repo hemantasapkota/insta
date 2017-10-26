@@ -37,10 +37,6 @@ acc2:
 
 ``` insta -account acc1 ```
 
-# How does it work ?
-
-Instagram web is built on top of Django. Using [djangobot](https://github.com/hemantasapkota/djangobot), Insta logs you in as a web user. From this point onwards, it behaves exactly like a web browser.
-
 # Features
 
 * Interactive console
@@ -70,5 +66,3 @@ See the examples folder for more sample scripts.
 * CLI app
 * Mobile apps ( IOS & Android )
 * Chrome extension
-
-
