@@ -23,38 +23,31 @@ func main() {
 	account := flag.String("account", "", "Account from .credentials.yaml")
 	exec := flag.String("exec", "", "Execute a command")
 	execFile := flag.String("execFile", "", "Execute file")
-
 	silent := flag.Bool("silent", false, "Only ouputs and errors will be printed.")
 	json := flag.Bool("json", false, "Output json")
 
 	flag.Parse()
 
 	flags.Silent = *silent
-
 	if *json {
 		flags.OutputFormat = "json"
 	}
-
 	if *username == "" || *password == "" {
 		data, err := ioutil.ReadFile(".credentials.yaml")
 		if err != nil {
 			flag.PrintDefaults()
 			return
 		}
-
 		credentials := make(map[string]interface{})
 		err = yaml.Unmarshal(data, credentials)
-
 		if err != nil {
 			flag.PrintDefaults()
 			return
 		}
-
 		if len(credentials) == 0 {
 			flag.PrintDefaults()
 			return
 		}
-
 		getAccountCreds := func(name string) (username string, password string) {
 			account, ok := credentials[name].(map[interface{}]interface{})
 			if ok {
@@ -63,7 +56,6 @@ func main() {
 			}
 			return
 		}
-
 		if len(credentials) == 1 {
 			accountName := ""
 			for key := range credentials {
@@ -92,43 +84,35 @@ func main() {
 		SetUsername(*username).
 		SetPassword(*password).
 		LoadCookies()
-
 	if instabot.Error != nil {
 		panic(instabot.Error)
 	}
-
 	_, err := instabot.
 		X("csrfmiddlewaretoken", instabot.Cookie("csrftoken").Value).
 		X("username", instabot.Username).
 		X("password", instabot.Password).Login()
-
 	sessionid := instabot.Cookie("sessionid").Value
 	if sessionid == "" {
 		color.Println("@r Authentication failed with Instagram.")
 		return
 	}
-
 	// Init our database
 	db, err := ldb.InitDB(".")
 	if err != nil {
 		panic("Couldn't init database")
 	}
 	gomadb.SetLevelDB(db)
-
 	// Setup our commander
 	commandHandler := commander.New(instabot).LoadIntentsFromFile("instagram.yaml")
-
 	// If exec mode, then execute a command and exit
 	if *exec != "" {
 		commandHandler.Execute(*exec)
 		return
 	}
-
 	// execute script file
 	if *execFile != "" {
 		commandHandler.Execute(fmt.Sprintf(`run_script file="%s"`, *execFile))
 		return
 	}
-
 	commandHandler.Listen()
 }

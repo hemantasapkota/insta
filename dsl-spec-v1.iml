@@ -36,10 +36,13 @@
 # $(`i`) is rewritten as $(filter var=i)
 # $(`#i`) returns the length if "i" is an array
 
-# $(delay) can be used to control the timing of an operation. Interval in seconds.
-# $(delay interval=5)
-#   $(unfollow id="$(`followingID`)")
-# $(nodelay)
+# $(delay) can be used to control the timing of an operation. Interval in seconds. Examples:
+#   $(delay interval=5)
+#   $(unfollow id="$(`followingID`)" d="$(delay interval=2")
+
+# run_script
+# Scripts can by dynamically loaded during execution
+# ex: run_script file=<<scriptfile.iml>> fromLine=0
 
 #> profile bot
 #   Specifies the profile. Profile defines bot behaviour.

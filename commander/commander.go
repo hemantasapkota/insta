@@ -65,7 +65,7 @@ func (log *commandLog) Key() string {
 
 type cmdFunc func(command string, tokens []string, data map[string]string) interface{}
 
-//Commander ...
+// Commander ...
 type Commander struct {
 	Intents   map[string]interface{}
 	Responses map[string]interface{}
@@ -77,7 +77,7 @@ type Commander struct {
 	cmdDelay int
 }
 
-//New ...
+// New ...
 func New(bot *djangobot.Bot) *Commander {
 	commander := &Commander{
 		Intents:   map[string]interface{}{},
@@ -93,7 +93,7 @@ func New(bot *djangobot.Bot) *Commander {
 	return commander
 }
 
-//LoadIntentsFromFile ...
+// LoadIntentsFromFile ...
 func (c *Commander) LoadIntentsFromFile(filename string) *Commander {
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -149,38 +149,32 @@ func (c *Commander) makeEndpoint(endpoint string, data map[string]string) string
 	return endpoint
 }
 
-//LoadIntents ...
+// LoadIntents ...
 func (c *Commander) LoadIntents(intents []byte) error {
 	if intents == nil {
 		return errors.New("intents data empty")
 	}
-
 	c.Intents = make(map[string]interface{})
 	err := yaml.Unmarshal(intents, c.Intents)
 	if err != nil {
 		return err
 	}
-
 	for key := range c.Intents {
 		c.Commands[key] = c.RequestExecutorCmd
 	}
-
 	// Load built in commands
 	c.Commands["get_data"] = c.GetDataCmd
 	c.Commands["filter"] = c.Filter
 	c.Commands["run_script"] = c.RunScript
 	c.Commands["counter"] = c.Counter
 	c.Commands["download"] = c.Download
-
 	c.Commands["loop"] = c.Loop
 	c.Commands["pool"] = c.Pool
 	c.Commands["delay"] = c.Delay
-	c.Commands["nodelay"] = c.Nodelay
-
 	return nil
 }
 
-//PrintCommands ...
+// PrintCommands ...
 func (c *Commander) PrintCommands() {
 	for cmdName := range c.Commands {
 		color.Print("@g\t ", cmdName)
@@ -188,13 +182,14 @@ func (c *Commander) PrintCommands() {
 	}
 }
 
-//Execute ...
+// Execute ...
 func (c *Commander) Execute(command string) (result interface{}) {
 	cmd, tokens, data, resultVar, assignType := c.parseCommand(strings.TrimSpace(command))
 	functor, ok := c.Commands[cmd]
 	if ok {
 		if c.cmdDelay > 0 {
 			time.Sleep(time.Second * time.Duration(c.cmdDelay))
+			c.cmdDelay = 0
 		}
 		// TODO: Refactor IF condition checking
 		ifBlock, ok := data["if"]

@@ -20,9 +20,3 @@ func (c *Commander) Delay(command string, tokens []string, data map[string]strin
 	c.cmdDelay = delay
 	return fmt.Sprintf("Delay set to %d", c.cmdDelay)
 }
-
-// Nodelay ...
-func (c *Commander) Nodelay(command string, tokens []string, data map[string]string) (result interface{}) {
-	c.cmdDelay = 0
-	return "Delay cleared."
-}

@@ -94,10 +94,11 @@ func (c *Commander) GetDataCmd(command string, tokens []string, data map[string]
 // RunScript ...
 func (c *Commander) RunScript(command string, token []string, data map[string]string) interface{} {
 	if len(data) == 0 {
-		color.Println("@r", command, "file=")
+		color.Println("@r", command, "file= fromLine=10 ( Ex: Start execution from line 10 )")
 		return nil
 	}
 	file, ok := data["file"]
+	fromLine, fromOk := data["fromLine"]
 	if ok {
 		// path =
 		script := filepath.Join(".", file)
@@ -112,8 +113,22 @@ func (c *Commander) RunScript(command string, token []string, data map[string]st
 			return nil
 		}
 		scripts := strings.Split(dataStr, "\n")
-		for _, statement := range scripts {
-			// ignore empty strings or comments
+		var i = 0
+		if fromOk {
+			val, err := strconv.Atoi(fromLine)
+			if err == nil {
+				// ex: for line 20, start from 19
+				i = val - 1
+				if i > len(scripts) {
+					i = len(scripts)
+				}
+				if i < 0 {
+					i = 0
+				}
+			}
+		}
+		for ; i < len(scripts); i++ {
+			statement := scripts[i]
 			stmt := strings.TrimSpace(statement)
 			if stmt != "" && stmt[0] != '#' {
 				c.Execute(statement)
@@ -145,7 +160,7 @@ func (c *Commander) Counter(command string, tokens []string, data map[string]str
 	return 0
 }
 
-//Download ...
+// Download ...
 func (c *Commander) Download(command string, tokens []string, data map[string]string) interface{} {
 	intent := c.Intents[command].(map[interface{}]interface{})
 	if len(data) == 0 {
