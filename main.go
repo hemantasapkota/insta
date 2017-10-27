@@ -18,9 +18,9 @@ import (
 )
 
 func main() {
-	username := flag.String("username", "", "")
-	password := flag.String("password", "", "")
-	account := flag.String("account", "", "Account from .credentials.yaml")
+	username := flag.String("username", "", "Use \"test\" for testing.")
+	password := flag.String("password", "", "Use \"test\" for testing.")
+	account := flag.String("account", "", "Account from .credentials.yaml.")
 	exec := flag.String("exec", "", "Execute a command")
 	execFile := flag.String("execFile", "", "Execute file")
 	silent := flag.Bool("silent", false, "Only ouputs and errors will be printed.")
@@ -78,23 +78,36 @@ func main() {
 		}
 	}
 
-	// Instagram
-	instabot := djangobot.With("https://www.instagram.com/accounts/login/ajax/").
-		ForHost("instagram.com").
-		SetUsername(*username).
-		SetPassword(*password).
-		LoadCookies()
-	if instabot.Error != nil {
-		panic(instabot.Error)
+	// Test username
+	if *username == "test" && *password == "test" {
+		flags.IsTestnet = true
 	}
-	_, err := instabot.
-		X("csrfmiddlewaretoken", instabot.Cookie("csrftoken").Value).
-		X("username", instabot.Username).
-		X("password", instabot.Password).Login()
-	sessionid := instabot.Cookie("sessionid").Value
-	if sessionid == "" {
-		color.Println("@r Authentication failed with Instagram.")
-		return
+
+	// Instagram
+	var instabot *djangobot.Bot
+	if flags.IsTestnet {
+		instabot = &djangobot.Bot{
+			Username: "test",
+			Password: "test",
+		}
+	} else {
+		instabot = djangobot.With("https://www.instagram.com/accounts/login/ajax/").
+			ForHost("instagram.com").
+			SetUsername(*username).
+			SetPassword(*password).
+			LoadCookies()
+		if instabot.Error != nil {
+			panic(instabot.Error)
+		}
+		instabot.
+			X("csrfmiddlewaretoken", instabot.Cookie("csrftoken").Value).
+			X("username", instabot.Username).
+			X("password", instabot.Password).Login()
+		sessionid := instabot.Cookie("sessionid").Value
+		if sessionid == "" {
+			color.Println("@r Authentication failed with Instagram.")
+			return
+		}
 	}
 	// Init our database
 	db, err := ldb.InitDB(".")
