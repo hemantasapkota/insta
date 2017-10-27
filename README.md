@@ -26,9 +26,9 @@ You can specify credentials inline or via a file.
 
 ```yaml
 acc1:
-    username: user1 
+    username: user1
     password: pass1
-    
+
 acc2:
     username: user2
     password: pass2
@@ -36,6 +36,10 @@ acc2:
 ```
 
 ``` insta -account acc1 ```
+
+Insta can be used anonynously using the test account. Test account is also a great way to quicky script flows.
+
+``` insta -username test -password test ```
 
 # Features
 
@@ -59,6 +63,10 @@ $(pool)
 
 The script queries for the tag *coffee*, loops through the result 5 times, filters the image url from the result and downloads it.
 See the examples folder for more sample scripts.
+
+To the run examples using test account:
+
+``` ./insta -silent -json -username test -password test -execFile=examples/insta_01.iml ```
 
 # Roadmap
 
