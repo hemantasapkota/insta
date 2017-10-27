@@ -1,0 +1,7 @@
+$(loop range=1,10 => i)
+  $($(`i`) ==> list)
+$(pool)
+
+$(run_script file=examples/recursiveAppend.iml fromLine=0 if="$(`#list`)_lessThan_10")
+
+$(`#list`)
