@@ -1,4 +1,8 @@
 $(counter set="50")
-$(loop range=0,10 => i)
-  $(counter if="$(`i`)_equals_15")
+$(loop range=0,9 => i)
+  $(counter if="$(`i`)_lessThan_5")
+$(pool)
+
+$(loop range=0,9 => i)
+  $(counter if="$(`i`)_aboveThan_7")
 $(pool)

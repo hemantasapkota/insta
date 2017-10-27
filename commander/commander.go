@@ -8,6 +8,7 @@ import (
 	"html/template"
 	"io/ioutil"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -195,6 +196,16 @@ func evalIfBlock(ifBlock string) (bool, error) {
 		result = strings.Contains(strings.ToLower(components[0]), strings.ToLower(components[2]))
 	case "equals":
 		result = strings.ToLower(components[0]) == strings.ToLower(components[2])
+	case "notEquals":
+		result = strings.ToLower(components[0]) != strings.ToLower(components[2])
+	case "lessThan":
+		num1, _ := strconv.Atoi(strings.ToLower(components[0]))
+		num2, _ := strconv.Atoi(strings.ToLower(components[2]))
+		result = num1 < num2
+	case "aboveThan":
+		num1, _ := strconv.Atoi(strings.ToLower(components[0]))
+		num2, _ := strconv.Atoi(strings.ToLower(components[2]))
+		result = num1 > num2
 	default:
 		return false, errors.New("unknown if condition")
 	}
