@@ -2,6 +2,7 @@ $(loop range=1,10 => i)
   $($(`i`) ==> list)
 $(pool)
 
-$(run_script file=examples/recursiveAppend.iml fromLine=0 if="$(`#list`)_lessThan_10")
+$(run_script file=examples/recursiveAppend.iml lineFrom=1 lineTo=5 if="$(`#list`)_lessThan_99")
 
+$(delay interval=2)
 $(`#list`)

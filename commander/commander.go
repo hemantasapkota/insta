@@ -169,6 +169,7 @@ func (c *Commander) LoadIntents(intents []byte) error {
 	c.Commands["get_data"] = c.GetDataCmd
 	c.Commands["filter"] = c.Filter
 	c.Commands["run_script"] = c.RunScript
+	c.Commands["run_script_base64"] = c.RunScriptBase64
 	c.Commands["counter"] = c.Counter
 	c.Commands["download"] = c.Download
 	c.Commands["loop"] = c.Loop
@@ -221,30 +222,15 @@ func (c *Commander) Execute(command string) (result interface{}) {
 			time.Sleep(time.Second * time.Duration(c.cmdDelay))
 			c.cmdDelay = 0
 		}
-		// TODO: Refactor IF condition checking
 		ifBlock, ok := data["if"]
 		if ok {
 			ifResult, err := evalIfBlock(ifBlock)
 			if err != nil {
 				return
 			}
-			// fmt.Printf("if result is: %v", ifResult)
 			if !ifResult {
 				return
 			}
-			// components := strings.Split(ifBlock, "_")
-			// if len(components) == 3 {
-			// 	if components[1] == "contains" {
-			// 		ifResult := strings.Contains(strings.ToLower(components[0]), strings.ToLower(components[2]))
-			// 		if !ifResult {
-			// 			return
-			// 		}
-			// 	} else {
-			// 		return
-			// 	}
-			// } else {
-			// 	return
-			// }
 		}
 		result = functor(cmd, tokens, data)
 		if result == nil {
@@ -284,7 +270,7 @@ func (c *Commander) Execute(command string) (result interface{}) {
 	return
 }
 
-//Listen ...
+// Listen ...
 func (c *Commander) Listen() {
 	line := liner.NewLiner()
 	defer line.Close()

@@ -11,7 +11,6 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/wsxiaoys/terminal/color"
@@ -89,54 +88,6 @@ func (c *Commander) GetDataCmd(command string, tokens []string, data map[string]
 		c.Responses[command] = m
 	})
 	return m
-}
-
-// RunScript ...
-func (c *Commander) RunScript(command string, token []string, data map[string]string) interface{} {
-	if len(data) == 0 {
-		color.Println("@r", command, "file= fromLine=10 ( Ex: Start execution from line 10 )")
-		return nil
-	}
-	file, ok := data["file"]
-	fromLine, fromOk := data["fromLine"]
-	if ok {
-		// path =
-		script := filepath.Join(".", file)
-		data, err := ioutil.ReadFile(script)
-		if err != nil {
-			color.Println("@r", command, err)
-			return nil
-		}
-		dataStr := strings.TrimSpace(string(data))
-		if len(dataStr) == 0 {
-			color.Println("@r", command, "Script Empty.")
-			return nil
-		}
-		scripts := strings.Split(dataStr, "\n")
-		var i = 0
-		if fromOk {
-			val, err := strconv.Atoi(fromLine)
-			if err == nil {
-				// ex: for line 20, start from 19
-				i = val - 1
-				if i > len(scripts) {
-					i = len(scripts)
-				}
-				if i < 0 {
-					i = 0
-				}
-			}
-		}
-		for ; i < len(scripts); i++ {
-			statement := scripts[i]
-			stmt := strings.TrimSpace(statement)
-			if stmt != "" && stmt[0] != '#' {
-				c.Execute(statement)
-				time.Sleep(100 * time.Millisecond)
-			}
-		}
-	}
-	return nil
 }
 
 // Counter ...
