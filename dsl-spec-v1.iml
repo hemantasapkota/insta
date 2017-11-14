@@ -42,7 +42,12 @@
 
 # run_script
 # Scripts can by dynamically loaded during execution
-# ex: run_script file=<<scriptfile.iml>> fromLine=0
+# ex: run_script file=<<scriptfile.iml>> lineFrom=0 lineTo=10
+
+# Recursive run_script
+# A recursive run_script is a script that invokes itself at some point during the execution.
+# In combination with the IF block, this construct can be used for creating looping behaviour.
+# See examples/recursiveAppend.iml
 
 #> profile bot
 #   Specifies the profile. Profile defines bot behaviour.

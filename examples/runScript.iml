@@ -2,4 +2,4 @@
 $(run_script file=examples/multiLoop.iml)
 
 # Load another script and execute from line 21
-$(run_script file=examples/multiLoop.iml fromLine=10)
+$(run_script file=examples/multiLoop.iml lineFrom=10)
