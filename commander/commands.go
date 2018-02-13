@@ -146,9 +146,9 @@ func (c *Commander) Download(command string, tokens []string, data map[string]st
 			}
 		}
 	}()
-	cmdLog.mediaMu.Lock()
-	defer cmdLog.mediaMu.Unlock()
-	cmdLog.Media[_url] = body
-	cmdLog.Save(cmdLog)
+	c.log.mediaMu.Lock()
+	defer c.log.mediaMu.Unlock()
+	c.log.Media[_url] = body
+	c.log.Save(c.log)
 	return "Downloaded " + _url
 }

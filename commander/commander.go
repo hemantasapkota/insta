@@ -23,7 +23,6 @@ import (
 )
 
 // A struct for logging the commands
-var cmdLog = &commandLog{Log: map[string]interface{}{}, Media: map[string]interface{}{}}
 var accountContext = ""
 
 // loop context
@@ -73,6 +72,7 @@ type Commander struct {
 	Store     map[string]interface{}
 	Commands  map[string]cmdFunc
 
+	log      *commandLog
 	loop     *loopCtx
 	bot      *djangobot.Bot
 	cmdDelay int
@@ -86,6 +86,7 @@ func New(bot *djangobot.Bot) *Commander {
 		Store:     map[string]interface{}{},
 		Commands:  map[string]cmdFunc{},
 		bot:       bot,
+		log:       &commandLog{Log: map[string]interface{}{}, Media: map[string]interface{}{}},
 	}
 	accountContext = bot.Username
 	if !flags.Silent {
@@ -172,6 +173,7 @@ func (c *Commander) LoadIntents(intents []byte) error {
 	c.Commands["run_script_base64"] = c.RunScriptBase64
 	c.Commands["counter"] = c.Counter
 	c.Commands["download"] = c.Download
+	c.Commands["save_to_db"] = c.SaveToDB
 	c.Commands["loop"] = c.Loop
 	c.Commands["pool"] = c.Pool
 	c.Commands["delay"] = c.Delay
@@ -258,11 +260,11 @@ func (c *Commander) Execute(command string) (result interface{}) {
 			intent := intentObj.(map[interface{}]interface{})
 			if intent["Log"].(bool) {
 				go func() {
-					cmdLog.logMu.Lock()
-					defer cmdLog.logMu.Unlock()
+					c.log.logMu.Lock()
+					defer c.log.logMu.Unlock()
 
-					cmdLog.Log[command] = result
-					cmdLog.Save(cmdLog)
+					c.log.Log[command] = result
+					c.log.Save(c.log)
 				}()
 			}
 		}
