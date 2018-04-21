@@ -55,7 +55,7 @@ Insta comes with a built-in DSL that can be used to script flows. Example flow l
 ```
 $(get_data path=explore/tags/coffee => result)
 $(loop range=0,5 => i)
-  $(filter var=result query=entry_data.TagPage[0].tag.media.nodes[$(`i`)].display_src => url)
+  $(filter var=result query=entry_data.TagPage[0].graphql.hashtag.edge_hashtag_to_media.edges[$(`i`)].node.display_url => url)
   $(download url="$(`url`)")
 $(pool)
 
