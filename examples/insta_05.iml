@@ -1,4 +1,4 @@
 # Get an account's user id
-$(get_data path=lexsapkota => profile)
+$(get_data path=lex_sapkota => profile)
 $(filter var=profile query=entry_data.ProfilePage[0] => profile)
-$(filter var=profile query=user.id => userId)
+$(filter var=profile query=graphql.user.id => userId)
