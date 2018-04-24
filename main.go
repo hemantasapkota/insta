@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"strings"
 
+        "github.com/parnurzeal/gorequest"
 	"github.com/hemantasapkota/djangobot"
 	"github.com/hemantasapkota/goma/gomadb"
 	ldb "github.com/hemantasapkota/goma/gomadb/leveldb"
@@ -89,6 +90,7 @@ func main() {
 		instabot = &djangobot.Bot{
 			Username: "test",
 			Password: "test",
+                        Client: gorequest.New(),
 		}
 	} else {
 		instabot = djangobot.With("https://www.instagram.com/accounts/login/ajax/").
