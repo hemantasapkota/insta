@@ -168,6 +168,7 @@ func (c *Commander) LoadIntents(intents []byte) error {
 	}
 	// Load built in commands
 	c.Commands["get_data"] = c.GetDataCmd
+	c.Commands["query"] = c.QueryCmd
 	c.Commands["filter"] = c.Filter
 	c.Commands["run_script"] = c.RunScript
 	c.Commands["run_script_base64"] = c.RunScriptBase64
